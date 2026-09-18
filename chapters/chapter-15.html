@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 15 — Real API: GitHub | Practical HTTP with Python</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="book-title">Python · HTTP · APIs</div>
+      <div class="book-subtitle">Practical HTTP,<br>Requests &amp; APIs</div>
+    </div>
+    <div class="sidebar-nav"><div class="nav-part">Front Matter</div>
+<a class="nav-link" href="../index.html"><span class="nav-num">—</span> Introduction</a>
+<div class="nav-part">Part I — The Web</div>
+<a class="nav-link" href="chapter-01.html"><span class="nav-num">01</span> How the Web Works</a>
+<a class="nav-link" href="chapter-02.html"><span class="nav-num">02</span> URLs</a>
+<a class="nav-link" href="chapter-03.html"><span class="nav-num">03</span> HTTP Methods</a>
+<a class="nav-link" href="chapter-04.html"><span class="nav-num">04</span> Status Codes</a>
+<a class="nav-link" href="chapter-05.html"><span class="nav-num">05</span> Headers</a>
+<div class="nav-part">Part II — Requests</div>
+<a class="nav-link" href="chapter-06.html"><span class="nav-num">06</span> Installing Requests</a>
+<a class="nav-link" href="chapter-07.html"><span class="nav-num">07</span> GET Requests</a>
+<a class="nav-link" href="chapter-08.html"><span class="nav-num">08</span> Query Parameters</a>
+<a class="nav-link" href="chapter-09.html"><span class="nav-num">09</span> POST Requests</a>
+<a class="nav-link" href="chapter-10.html"><span class="nav-num">10</span> Authentication</a>
+<a class="nav-link" href="chapter-11.html"><span class="nav-num">11</span> Error Handling</a>
+<div class="nav-part">Part III — APIs</div>
+<a class="nav-link" href="chapter-12.html"><span class="nav-num">12</span> What is a REST API?</a>
+<a class="nav-link" href="chapter-13.html"><span class="nav-num">13</span> Working with JSON</a>
+<a class="nav-link" href="chapter-14.html"><span class="nav-num">14</span> Real API: OpenWeather</a>
+<a class="nav-link active" href="chapter-15.html"><span class="nav-num">15</span> Real API: GitHub</a>
+<div class="nav-part">Part IV — Projects</div>
+<a class="nav-link" href="project-01.html"><span class="nav-num">P1</span> Weather CLI</a>
+<a class="nav-link" href="project-02.html"><span class="nav-num">P2</span> GitHub Repo Finder</a>
+<a class="nav-link" href="project-03.html"><span class="nav-num">P3</span> News Aggregator</a>
+<div class="nav-part">Reference</div>
+<a class="nav-link" href="glossary.html"><span class="nav-num">—</span> Glossary</a>
+<a class="nav-link" href="cheatsheet.html"><span class="nav-num">—</span> Cheat Sheet</a>
+</div>
+    <div class="sidebar-footer">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+      <span class="progress-label">Chapter 15 of 15</span>
+    </div>
+  </nav>
+  <main class="main"><div class="chapter-content">
+    <div class="chapter-eyebrow">Part III — APIs · Chapter 15</div>
+    <h1 class="chapter-title">Real API: GitHub</h1>
+    <p class="chapter-lead">GitHub's API is one of the best-documented in the world. In this chapter you'll use it to search repos, read user profiles, and handle pagination — everything you need for real API work.</p>
+    
+<div class="objectives"><div class="objectives-title">🎯 What you'll learn</div><ul>
+<li>Using a token-authenticated API</li>
+<li>Navigating GitHub's API documentation</li>
+<li>Searching repositories and reading user data</li>
+<li>Pagination — fetching more than one page of results</li>
+</ul></div>
+
+<div class="callout tip">
+<div class="callout-title">💡 Setup: GitHub Personal Access Token</div>
+<div class="callout-body"><p>GitHub's API works without auth (rate limited to 60 requests/hour) or with a Personal Access Token (5,000/hour). To get one: GitHub → Settings → Developer settings → Personal access tokens → Generate new token (classic). Select public_repo scope. Store as <code>export GITHUB_TOKEN="ghp_yourtoken"</code>.</p></div>
+</div>
+
+<h2>15.1 GitHub API Basics</h2>
+<p>Base URL: <code>https://api.github.com</code></p>
+<p>Auth header: <code>Authorization: Bearer YOUR_TOKEN</code></p>
+<pre><span class="kw">import</span> os, requests
+
+token = os.environ.<span class="fn">get</span>(<span class="str">"GITHUB_TOKEN"</span>)
+headers = {<span class="str">"Authorization"</span>: <span class="fn">f</span><span class="str">"Bearer {token}"</span>} <span class="kw">if</span> token <span class="kw">else</span> {}
+
+BASE = <span class="str">"https://api.github.com"</span></pre>
+
+<h2>15.2 Fetching a User's Profile</h2>
+<pre>response = requests.<span class="fn">get</span>(<span class="fn">f</span><span class="str">"{BASE}/users/python"</span>, headers=headers)
+user = response.<span class="fn">json</span>()
+
+<span class="fn">print</span>(user[<span class="str">"login"</span>])         <span class="cm"># "python"</span>
+<span class="fn">print</span>(user[<span class="str">"public_repos"</span>])  <span class="cm"># number of public repos</span>
+<span class="fn">print</span>(user[<span class="str">"followers"</span>])     <span class="cm"># follower count</span></pre>
+
+<h2>15.3 Searching Repositories</h2>
+<pre>response = requests.<span class="fn">get</span>(
+    <span class="fn">f</span><span class="str">"{BASE}/search/repositories"</span>,
+    headers=headers,
+    params={
+        <span class="str">"q"</span>: <span class="str">"python api tutorial"</span>,
+        <span class="str">"sort"</span>: <span class="str">"stars"</span>,
+        <span class="str">"order"</span>: <span class="str">"desc"</span>,
+        <span class="str">"per_page"</span>: <span class="num">5</span>,
+    }
+)
+
+data = response.<span class="fn">json</span>()
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"Total results: {data['total_count']}"</span>)
+
+<span class="kw">for</span> repo <span class="kw">in</span> data[<span class="str">"items"</span>]:
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"  ⭐ {repo['stargazers_count']:,} — {repo['full_name']}"</span>)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"     {repo.get('description', 'No description')}"</span>)</pre>
+
+<h2>15.4 Pagination</h2>
+<p>GitHub returns max 100 results per page. For more, loop through pages:</p>
+<pre><span class="kw">def</span> <span class="fn">get_all_repos</span>(username, max_pages=<span class="num">3</span>):
+    all_repos = []
+    <span class="kw">for</span> page <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, max_pages + <span class="num">1</span>):
+        response = requests.<span class="fn">get</span>(
+            <span class="fn">f</span><span class="str">"{BASE}/users/{username}/repos"</span>,
+            headers=headers,
+            params={<span class="str">"per_page"</span>: <span class="num">30</span>, <span class="str">"page"</span>: page}
+        )
+        repos = response.<span class="fn">json</span>()
+        <span class="kw">if not</span> repos:   <span class="cm"># empty page = no more results</span>
+            <span class="kw">break</span>
+        all_repos.<span class="fn">extend</span>(repos)
+    <span class="kw">return</span> all_repos
+
+repos = <span class="fn">get_all_repos</span>(<span class="str">"python"</span>)
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"Fetched {len(repos)} repos"</span>)</pre>
+
+<h2>15.5 Checking Rate Limits</h2>
+<pre>response = requests.<span class="fn">get</span>(<span class="fn">f</span><span class="str">"{BASE}/rate_limit"</span>, headers=headers)
+limits = response.<span class="fn">json</span>()[<span class="str">"rate"</span>]
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"Requests remaining: {limits['remaining']}/{limits['limit']}"</span>)</pre>
+
+<div class="exercise-block">
+<div class="exercise-title">📝 Exercises</div>
+<div class="question" data-correct="B">
+<div class="question-text">Exercise 1 — Why does the GitHub search endpoint return results under <code>data["items"]</code> instead of directly as a list?</div>
+<ul class="options">
+<li class="option" data-value="A"><span class="option-key">A</span> It's a bug in the GitHub API</li>
+<li class="option" data-value="B"><span class="option-key">B</span> The response also includes metadata like total_count, so items is wrapped in an object</li>
+<li class="option" data-value="C"><span class="option-key">C</span> GitHub uses XML, not JSON</li>
+</ul>
+<button class="reveal-btn" data-target="e15-1" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+<div class="reveal-content" id="e15-1">Search endpoints typically return an envelope object: <code>{"total_count": 1234, "incomplete_results": false, "items": [...]}</code>. This lets them include metadata alongside the results. Always check the API docs for the response structure.</div>
+</div>
+<div class="question" data-correct="C">
+<div class="question-text">Exercise 2 — Without authentication, GitHub limits you to how many requests per hour?</div>
+<ul class="options">
+<li class="option" data-value="A"><span class="option-key">A</span> 1,000</li>
+<li class="option" data-value="B"><span class="option-key">B</span> 500</li>
+<li class="option" data-value="C"><span class="option-key">C</span> 60</li>
+</ul>
+<button class="reveal-btn" data-target="e15-2" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+<div class="reveal-content" id="e15-2">Unauthenticated GitHub API requests are limited to 60/hour. Authenticated requests get 5,000/hour. This is why getting a token matters for serious work.</div>
+</div>
+</div>
+
+<div class="callout checkpoint">
+<div class="callout-title">🧠 Final Project: GitHub Repo Finder</div>
+<div class="callout-body">
+<p>Build a program that takes a GitHub username as input, fetches their public repos, sorts them by star count, and prints the top 5 with name, stars, and description. Add error handling for non-existent users.</p>
+<textarea class="checkpoint-input" style="min-height:160px;" placeholder="Write the complete program…"></textarea>
+<button class="reveal-btn" data-target="ch15-sol" data-show-label="Show solution" data-hide-label="Hide">Show solution</button>
+<div class="reveal-content" id="ch15-sol"><pre><span class="kw">import</span> os, requests
+
+token = os.environ.<span class="fn">get</span>(<span class="str">"GITHUB_TOKEN"</span>)
+headers = {<span class="str">"Authorization"</span>: <span class="fn">f</span><span class="str">"Bearer {token}"</span>} <span class="kw">if</span> token <span class="kw">else</span> {}
+BASE = <span class="str">"https://api.github.com"</span>
+
+username = <span class="fn">input</span>(<span class="str">"GitHub username: "</span>).strip()
+
+<span class="kw">try</span>:
+    response = requests.<span class="fn">get</span>(
+        <span class="fn">f</span><span class="str">"{BASE}/users/{username}/repos"</span>,
+        headers=headers,
+        params={<span class="str">"per_page"</span>: <span class="num">100</span>},
+        timeout=<span class="num">10</span>
+    )
+<span class="kw">except</span> requests.exceptions.<span class="cls">RequestException</span> <span class="kw">as</span> e:
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Connection error: {e}"</span>)
+    exit()
+
+<span class="kw">if</span> response.status_code == <span class="num">404</span>:
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"User '{username}' not found."</span>)
+    exit()
+<span class="kw">elif not</span> response.ok:
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Error: {response.status_code}"</span>)
+    exit()
+
+repos = <span class="fn">sorted</span>(response.<span class="fn">json</span>(),
+               key=<span class="kw">lambda</span> r: r[<span class="str">"stargazers_count"</span>],
+               reverse=<span class="kw">True</span>)
+
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"\nTop repos for @{username}:\n"</span>)
+<span class="kw">for</span> repo <span class="kw">in</span> repos[:<span class="num">5</span>]:
+    stars = repo[<span class="str">"stargazers_count"</span>]
+    desc  = repo.<span class="fn">get</span>(<span class="str">"description"</span>) <span class="kw">or</span> <span class="str">"No description"</span>
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"  ⭐ {stars:,}  {repo['name']}"</span>)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"        {desc}\n"</span>)</pre></div>
+</div>
+</div>
+
+    <div class="chapter-nav">
+      <a class="nav-btn" href="chapter-14.html"><span class="nav-btn-dir">← Previous</span><span class="nav-btn-title">Chapter 14: Real API: OpenWeather</span></a>
+      <a class="nav-btn next" href="project-01.html"><span class="nav-btn-dir">Next →</span><span class="nav-btn-title">Project 1: Weather CLI</span></a>
+    </div>
+  </div></main>
+</div>
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<script src="../js/book.js"></script>
+</body></html>

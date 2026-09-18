@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cheat Sheet | Practical HTTP with Python</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="book-title">Python · HTTP · APIs</div>
+      <div class="book-subtitle">Practical HTTP,<br>Requests &amp; APIs</div>
+    </div>
+    <div class="sidebar-nav"><div class="nav-part">Front Matter</div>
+<a class="nav-link" href="../index.html"><span class="nav-num">—</span> Introduction</a>
+<div class="nav-part">Part I — The Web</div>
+<a class="nav-link" href="chapter-01.html"><span class="nav-num">01</span> How the Web Works</a>
+<a class="nav-link" href="chapter-02.html"><span class="nav-num">02</span> URLs</a>
+<a class="nav-link" href="chapter-03.html"><span class="nav-num">03</span> HTTP Methods</a>
+<a class="nav-link" href="chapter-04.html"><span class="nav-num">04</span> Status Codes</a>
+<a class="nav-link" href="chapter-05.html"><span class="nav-num">05</span> Headers</a>
+<div class="nav-part">Part II — Requests</div>
+<a class="nav-link" href="chapter-06.html"><span class="nav-num">06</span> Installing Requests</a>
+<a class="nav-link" href="chapter-07.html"><span class="nav-num">07</span> GET Requests</a>
+<a class="nav-link" href="chapter-08.html"><span class="nav-num">08</span> Query Parameters</a>
+<a class="nav-link" href="chapter-09.html"><span class="nav-num">09</span> POST Requests</a>
+<a class="nav-link" href="chapter-10.html"><span class="nav-num">10</span> Authentication</a>
+<a class="nav-link" href="chapter-11.html"><span class="nav-num">11</span> Error Handling</a>
+<div class="nav-part">Part III — APIs</div>
+<a class="nav-link" href="chapter-12.html"><span class="nav-num">12</span> What is a REST API?</a>
+<a class="nav-link" href="chapter-13.html"><span class="nav-num">13</span> Working with JSON</a>
+<a class="nav-link" href="chapter-14.html"><span class="nav-num">14</span> Real API: OpenWeather</a>
+<a class="nav-link" href="chapter-15.html"><span class="nav-num">15</span> Real API: GitHub</a>
+<div class="nav-part">Part IV — Projects</div>
+<a class="nav-link" href="project-01.html"><span class="nav-num">P1</span> Weather CLI</a>
+<a class="nav-link" href="project-02.html"><span class="nav-num">P2</span> GitHub Repo Finder</a>
+<a class="nav-link" href="project-03.html"><span class="nav-num">P3</span> News Aggregator</a>
+<div class="nav-part">Reference</div>
+<a class="nav-link" href="glossary.html"><span class="nav-num">—</span> Glossary</a>
+<a class="nav-link active" href="cheatsheet.html"><span class="nav-num">—</span> Cheat Sheet</a>
+</div>
+    <div class="sidebar-footer">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+      <span class="progress-label">Reference</span>
+    </div>
+  </nav>
+  <main class="main"><div class="chapter-content">
+    
+<div class="chapter-eyebrow">Reference</div>
+<h1 class="chapter-title">Cheat Sheet</h1>
+<p class="chapter-lead">Everything in one place. Print it, bookmark it, keep it open while you code.</p>
+
+<h2>Install</h2>
+<pre>pip install requests</pre>
+
+<h2>Making Requests</h2>
+<pre><span class="kw">import</span> requests
+
+response = requests.<span class="fn">get</span>(url)
+response = requests.<span class="fn">get</span>(url, params={<span class="str">"key"</span>: <span class="str">"val"</span>})
+response = requests.<span class="fn">get</span>(url, headers={<span class="str">"Authorization"</span>: <span class="str">"Bearer TOKEN"</span>})
+response = requests.<span class="fn">get</span>(url, timeout=<span class="num">10</span>)
+
+response = requests.<span class="fn">post</span>(url, json={<span class="str">"key"</span>: <span class="str">"val"</span>})
+response = requests.<span class="fn">post</span>(url, data={<span class="str">"key"</span>: <span class="str">"val"</span>})
+
+response = requests.<span class="fn">put</span>(url, json=data)
+response = requests.<span class="fn">patch</span>(url, json={<span class="str">"field"</span>: <span class="str">"value"</span>})
+response = requests.<span class="fn">delete</span>(url)</pre>
+
+<h2>Response Object</h2>
+<pre>response.status_code        <span class="cm"># int: 200, 404, etc.</span>
+response.ok                 <span class="cm"># True for 2xx status codes</span>
+response.text               <span class="cm"># body as string</span>
+response.content            <span class="cm"># body as bytes</span>
+response.<span class="fn">json</span>()             <span class="cm"># parse JSON to dict/list</span>
+response.headers            <span class="cm"># response headers (dict-like)</span>
+response.url                <span class="cm"># final URL after redirects</span>
+response.<span class="fn">raise_for_status</span>()  <span class="cm"># raise HTTPError on 4xx/5xx</span></pre>
+
+<h2>Error Handling Pattern</h2>
+<pre><span class="kw">try</span>:
+    response = requests.<span class="fn">get</span>(url, timeout=<span class="num">10</span>)
+    response.<span class="fn">raise_for_status</span>()
+    data = response.<span class="fn">json</span>()
+<span class="kw">except</span> requests.exceptions.<span class="cls">HTTPError</span>:
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"HTTP {response.status_code}"</span>)
+<span class="kw">except</span> requests.exceptions.<span class="cls">ConnectionError</span>:
+    <span class="fn">print</span>(<span class="str">"No connection"</span>)
+<span class="kw">except</span> requests.exceptions.<span class="cls">Timeout</span>:
+    <span class="fn">print</span>(<span class="str">"Timed out"</span>)
+<span class="kw">except</span> requests.exceptions.<span class="cls">RequestException</span> <span class="kw">as</span> e:
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Error: {e}"</span>)</pre>
+
+<h2>Authentication</h2>
+<pre><span class="kw">import</span> os
+api_key = os.environ.<span class="fn">get</span>(<span class="str">"MY_API_KEY"</span>)   <span class="cm"># SAFE — not in code</span>
+
+headers = {<span class="str">"Authorization"</span>: <span class="fn">f</span><span class="str">"Bearer {api_key}"</span>}
+response = requests.<span class="fn">get</span>(url, headers=headers, auth=(<span class="str">"user"</span>, <span class="str">"pass"</span>))</pre>
+
+<h2>Status Codes to Know</h2>
+<div class="diagram">200 OK              success, data returned
+201 Created         resource created (POST)
+204 No Content      success, nothing returned
+
+400 Bad Request     malformed / invalid data
+401 Unauthorized    not authenticated
+403 Forbidden       authenticated but not allowed
+404 Not Found       resource doesn't exist
+429 Rate Limited    too many requests
+
+500 Server Error    server crashed (not your fault)
+503 Unavailable     server down, retry later</div>
+
+<h2>URL Structure</h2>
+<div class="diagram">https://api.example.com:443/users/42?sort=name&amp;limit=10
+schema  host           port path        query string</div>
+
+<h2>REST: Method + URL = Action</h2>
+<div class="diagram">GET    /items      list all
+GET    /items/5    get one
+POST   /items      create
+PUT    /items/5    replace
+PATCH  /items/5    partial update
+DELETE /items/5    delete</div>
+
+<h2>JSON to Python</h2>
+<div class="diagram">JSON object   dict
+JSON array    list
+string        str
+number        int / float
+true/false    True / False
+null          None</div>
+
+<h2>Safe Navigation</h2>
+<pre>data.<span class="fn">get</span>(<span class="str">"key"</span>)                     <span class="cm"># None if missing</span>
+data.<span class="fn">get</span>(<span class="str">"key"</span>, <span class="str">"default"</span>)         <span class="cm"># default if missing</span>
+data.<span class="fn">get</span>(<span class="str">"a"</span>, {}).<span class="fn">get</span>(<span class="str">"b"</span>)        <span class="cm"># nested safe</span>
+data[<span class="str">"list"</span>][<span class="num">0</span>][<span class="str">"key"</span>]            <span class="cm"># list item key</span></pre>
+
+<h2>Environment Variables</h2>
+<pre>export MY_KEY="value"              <span class="cm"># Mac/Linux terminal</span>
+set MY_KEY=value                   <span class="cm"># Windows terminal</span>
+
+key = os.environ.<span class="fn">get</span>(<span class="str">"MY_KEY"</span>)    <span class="cm"># None if not set</span>
+key = os.environ[<span class="str">"MY_KEY"</span>]       <span class="cm"># KeyError if not set</span></pre>
+
+    <div class="chapter-nav">
+      <a class="nav-btn" href="glossary.html"><span class="nav-btn-dir">← Previous</span><span class="nav-btn-title">Glossary</span></a>
+      <span class="nav-btn next disabled"><span class="nav-btn-dir">—</span><span class="nav-btn-title">End of book</span></span>
+    </div>
+  </div></main>
+</div>
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<script src="../js/book.js"></script>
+</body></html>

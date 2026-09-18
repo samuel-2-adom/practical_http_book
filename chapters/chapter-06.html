@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 6 — Installing Requests | Practical HTTP with Python</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="book-title">Python · HTTP · APIs</div>
+      <div class="book-subtitle">Practical HTTP,<br>Requests &amp; APIs</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-part">Front Matter</div>
+      <a class="nav-link" href="../index.html"><span class="nav-num">—</span> Introduction</a>
+      <div class="nav-part">Part I — The Web</div>
+      <a class="nav-link" href="chapter-01.html"><span class="nav-num">01</span> How the Web Works</a>
+      <a class="nav-link" href="chapter-02.html"><span class="nav-num">02</span> URLs</a>
+      <a class="nav-link" href="chapter-03.html"><span class="nav-num">03</span> HTTP Methods</a>
+      <a class="nav-link" href="chapter-04.html"><span class="nav-num">04</span> Status Codes</a>
+      <a class="nav-link" href="chapter-05.html"><span class="nav-num">05</span> Headers</a>
+      <div class="nav-part">Part II — Requests</div>
+      <a class="nav-link active" href="chapter-06.html"><span class="nav-num">06</span> Installing Requests</a>
+      <a class="nav-link" href="chapter-07.html"><span class="nav-num">07</span> GET Requests</a>
+      <a class="nav-link" href="chapter-08.html"><span class="nav-num">08</span> Query Parameters</a>
+      <a class="nav-link" href="chapter-09.html"><span class="nav-num">09</span> POST Requests</a>
+      <a class="nav-link" href="chapter-10.html"><span class="nav-num">10</span> Authentication</a>
+      <a class="nav-link" href="chapter-11.html"><span class="nav-num">11</span> Error Handling</a>
+      <div class="nav-part">Part III — APIs</div>
+      <a class="nav-link" href="chapter-12.html"><span class="nav-num">12</span> What is a REST API?</a>
+      <a class="nav-link" href="chapter-13.html"><span class="nav-num">13</span> Working with JSON</a>
+      <a class="nav-link" href="chapter-14.html"><span class="nav-num">14</span> Real API: OpenWeather</a>
+      <a class="nav-link" href="chapter-15.html"><span class="nav-num">15</span> Real API: GitHub</a>
+      <div class="nav-part">Part IV — Projects</div>
+      <a class="nav-link" href="project-01.html"><span class="nav-num">P1</span> Weather CLI</a>
+      <a class="nav-link" href="project-02.html"><span class="nav-num">P2</span> GitHub Repo Finder</a>
+      <a class="nav-link" href="project-03.html"><span class="nav-num">P3</span> News Aggregator</a>
+      <div class="nav-part">Reference</div>
+      <a class="nav-link" href="glossary.html"><span class="nav-num">—</span> Glossary</a>
+      <a class="nav-link" href="cheatsheet.html"><span class="nav-num">—</span> Cheat Sheet</a>
+    </div>
+    <div class="sidebar-footer">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+      <span class="progress-label">Chapter 6 of 15</span>
+    </div>
+  </nav>
+  <main class="main">
+    <div class="chapter-content">
+      <div class="chapter-eyebrow">Part II — Python Requests · Chapter 6</div>
+      <h1 class="chapter-title">Installing Requests</h1>
+      <p class="chapter-lead">Part I was theory. From here on, you write code. This chapter gets your environment ready and walks you through your very first real HTTP request in Python.</p>
+
+      <div class="objectives">
+        <div class="objectives-title">🎯 What you'll learn</div>
+        <ul>
+          <li>How to install the requests library</li>
+          <li>The structure of the Response object</li>
+          <li>How to make your first GET request and read the result</li>
+          <li>How to inspect what the server actually sent back</li>
+        </ul>
+      </div>
+
+      <h2>6.1 Why Not Use the Standard Library?</h2>
+      <p>Python's standard library includes <code>urllib</code> for making HTTP requests. It works, but it's verbose and tedious for everyday use:</p>
+
+      <pre><span class="cm"># Using urllib — the standard library way</span>
+<span class="kw">import</span> urllib.request
+<span class="kw">import</span> urllib.parse
+<span class="kw">import</span> json
+
+url = <span class="str">"https://api.example.com/users"</span>
+<span class="kw">with</span> urllib.request.<span class="fn">urlopen</span>(url) <span class="kw">as</span> response:
+    data = json.<span class="fn">loads</span>(response.<span class="fn">read</span>().<span class="fn">decode</span>(<span class="str">"utf-8"</span>))</pre>
+
+      <pre><span class="cm"># Using requests — the same thing</span>
+<span class="kw">import</span> requests
+
+data = requests.<span class="fn">get</span>(<span class="str">"https://api.example.com/users"</span>).<span class="fn">json</span>()</pre>
+
+      <p><code>requests</code> is the de facto standard for HTTP in Python. It's more readable, more powerful, and handles edge cases automatically. Install it once and use it everywhere.</p>
+
+      <h2>6.2 Installing Requests</h2>
+      <p>In your terminal:</p>
+      <pre>pip install requests</pre>
+      <p>If you're using a virtual environment (recommended):</p>
+      <pre>python -m venv venv
+source venv/bin/activate   <span class="cm"># Mac/Linux</span>
+venv\Scripts\activate      <span class="cm"># Windows</span>
+
+pip install requests</pre>
+      <p>Verify it installed correctly:</p>
+      <pre>python -c "import requests; print(requests.__version__)"
+<span class="cm"># Should print something like: 2.31.0</span></pre>
+
+      <h2>6.3 Your First Request</h2>
+      <p>Create a file called <code>first_request.py</code> and type this:</p>
+
+      <pre><span class="kw">import</span> requests
+
+response = requests.<span class="fn">get</span>(<span class="str">"https://httpbin.org/get"</span>)
+
+<span class="fn">print</span>(response.status_code)
+<span class="fn">print</span>(response.text)</pre>
+
+      <p>Run it: <code>python first_request.py</code></p>
+      <p>You should see a status code of <code>200</code> and a JSON response showing information about your own request. <code>httpbin.org</code> is a test service that echoes back what you sent.</p>
+
+      <div class="callout tip">
+        <div class="callout-title">💡 httpbin.org</div>
+        <div class="callout-body"><p><code>httpbin.org</code> is a free service perfect for learning. It has endpoints like <code>/get</code>, <code>/post</code>, <code>/status/404</code> that let you test your code without needing a real API.</p></div>
+      </div>
+
+      <h2>6.4 The Response Object</h2>
+      <p>When you call <code>requests.get()</code>, you get back a <strong>Response object</strong>. It's not just the raw data — it contains everything the server sent:</p>
+
+      <pre>response = requests.<span class="fn">get</span>(<span class="str">"https://httpbin.org/get"</span>)
+
+response.status_code   <span class="cm"># 200  (integer)</span>
+response.text          <span class="cm"># response body as a string</span>
+response.content       <span class="cm"># response body as raw bytes</span>
+response.headers       <span class="cm"># response headers (dict-like)</span>
+response.url           <span class="cm"># the final URL (after any redirects)</span>
+response.<span class="fn">json</span>()        <span class="cm"># parse body as JSON → Python dict/list</span></pre>
+
+      <h3>status_code</h3>
+      <pre><span class="fn">print</span>(response.status_code)   <span class="cm"># 200</span>
+<span class="fn">print</span>(<span class="fn">type</span>(response.status_code))  <span class="cm"># &lt;class 'int'&gt;</span></pre>
+
+      <h3>text</h3>
+      <p>The response body decoded as a Unicode string. Use this for HTML or when the response is text.</p>
+      <pre><span class="fn">print</span>(response.text)
+<span class="cm"># '{\n  "args": {}, \n  "headers": {...}, ...'</span></pre>
+
+      <h3>content</h3>
+      <p>The raw bytes of the response. Use this for binary data like images or files.</p>
+      <pre><span class="fn">print</span>(response.content)
+<span class="cm"># b'{\n  "args": {}, ...'</span></pre>
+
+      <h3>json()</h3>
+      <p>If the response is JSON, this parses it directly into a Python dictionary or list. This is what you'll use most often with APIs.</p>
+      <pre>data = response.<span class="fn">json</span>()
+<span class="fn">print</span>(<span class="fn">type</span>(data))  <span class="cm"># &lt;class 'dict'&gt;</span>
+<span class="fn">print</span>(data[<span class="str">"url"</span>])  <span class="cm"># 'https://httpbin.org/get'</span></pre>
+
+      <h2>6.5 Checking if a Request Succeeded</h2>
+      <p>The simplest check:</p>
+      <pre>response = requests.<span class="fn">get</span>(<span class="str">"https://httpbin.org/get"</span>)
+
+<span class="kw">if</span> response.status_code == <span class="num">200</span>:
+    data = response.<span class="fn">json</span>()
+    <span class="fn">print</span>(<span class="str">"Got data:"</span>, data)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="str">f"Something went wrong: {response.status_code}"</span>)</pre>
+
+      <p>There's also a shortcut — the <code>ok</code> property returns <code>True</code> for any 2xx status code:</p>
+      <pre><span class="kw">if</span> response.ok:
+    <span class="fn">print</span>(<span class="str">"Success"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="str">f"Error {response.status_code}"</span>)</pre>
+
+      <div class="callout warning">
+        <div class="callout-title">⚠️ Don't assume success</div>
+        <div class="callout-body"><p>Always check the status code before trying to use <code>.json()</code>. If you call <code>.json()</code> on an error response, you might get an exception if the body isn't valid JSON, or worse — silently process error data as if it were real data.</p></div>
+      </div>
+
+      <div class="exercise-block">
+        <div class="exercise-title">📝 Try it — Run these yourself</div>
+
+        <div class="question" data-correct="B">
+          <div class="question-text">Exercise 1 — What does <code>response.text</code> return?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> A Python dictionary</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> The response body as a string</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> The status code as text</li>
+          </ul>
+          <button class="reveal-btn" data-target="e6-1" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e6-1"><code>response.text</code> is the response body decoded as a string. Use <code>response.json()</code> to parse JSON into a Python dict/list, or <code>response.content</code> for raw bytes.</div>
+        </div>
+
+        <div class="question" data-correct="C">
+          <div class="question-text">Exercise 2 — What type does <code>response.json()</code> return for a JSON object response?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> str</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> list</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> dict</li>
+          </ul>
+          <button class="reveal-btn" data-target="e6-2" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e6-2">A JSON object <code>{"key": "value"}</code> becomes a Python <code>dict</code>. A JSON array <code>[1, 2, 3]</code> becomes a Python <code>list</code>. The type depends on what the server returned.</div>
+        </div>
+
+        <div class="question" data-correct="A">
+          <div class="question-text">Exercise 3 — What does <code>response.ok</code> return for a 404 response?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> False</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> True</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> None</li>
+          </ul>
+          <button class="reveal-btn" data-target="e6-3" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e6-3"><code>response.ok</code> is <code>True</code> only for 2xx status codes (success). A 404 is a 4xx error, so <code>ok</code> returns <code>False</code>.</div>
+        </div>
+      </div>
+
+      <div class="callout checkpoint">
+        <div class="callout-title">🧠 Checkpoint — Try This</div>
+        <div class="callout-body">
+          <p>Make a GET request to <code>https://httpbin.org/get</code> and print:</p>
+          <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:4px;margin:10px 0;font-family:var(--font-sans);font-size:14px;color:var(--text-muted);">
+            <li style="padding-left:16px;">· The status code</li>
+            <li style="padding-left:16px;">· Whether it was successful (using <code>response.ok</code>)</li>
+            <li style="padding-left:16px;">· The <code>Content-Type</code> response header</li>
+            <li style="padding-left:16px;">· The parsed JSON as a Python dictionary</li>
+          </ul>
+          <textarea class="checkpoint-input" placeholder="Write your code here, then run it…"></textarea>
+          <button class="reveal-btn" data-target="ch6-solution" data-show-label="Show solution" data-hide-label="Hide solution">Show solution</button>
+          <div class="reveal-content" id="ch6-solution">
+<pre><span class="kw">import</span> requests
+
+response = requests.<span class="fn">get</span>(<span class="str">"https://httpbin.org/get"</span>)
+
+<span class="fn">print</span>(<span class="str">"Status code:"</span>, response.status_code)
+<span class="fn">print</span>(<span class="str">"Successful:"</span>, response.ok)
+<span class="fn">print</span>(<span class="str">"Content-Type:"</span>, response.headers[<span class="str">"Content-Type"</span>])
+
+data = response.<span class="fn">json</span>()
+<span class="fn">print</span>(<span class="str">"Response data:"</span>, data)</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout concept">
+        <div class="callout-title">📌 What to remember</div>
+        <div class="callout-body">
+          <p>· Install once: <code>pip install requests</code></p>
+          <p>· <code>requests.get(url)</code> → Response object</p>
+          <p>· <code>response.status_code</code> → integer</p>
+          <p>· <code>response.ok</code> → True for 2xx</p>
+          <p>· <code>response.text</code> → body as string</p>
+          <p>· <code>response.json()</code> → body parsed as Python dict/list</p>
+          <p>· <code>response.headers</code> → response headers</p>
+          <p>· Always check status code before using the data</p>
+        </div>
+      </div>
+
+      <div class="chapter-nav">
+        <a class="nav-btn" href="chapter-05.html">
+          <span class="nav-btn-dir">← Previous</span>
+          <span class="nav-btn-title">Chapter 5: Headers</span>
+        </a>
+        <a class="nav-btn next" href="chapter-07.html">
+          <span class="nav-btn-dir">Next →</span>
+          <span class="nav-btn-title">Chapter 7: GET Requests</span>
+        </a>
+      </div>
+    </div>
+  </main>
+</div>
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<script src="../js/book.js"></script>
+</body>
+</html>

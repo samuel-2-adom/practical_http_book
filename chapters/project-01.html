@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project 1: Weather CLI | Practical HTTP with Python</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="book-title">Python · HTTP · APIs</div>
+      <div class="book-subtitle">Practical HTTP,<br>Requests &amp; APIs</div>
+    </div>
+    <div class="sidebar-nav"><div class="nav-part">Front Matter</div>
+<a class="nav-link" href="../index.html"><span class="nav-num">—</span> Introduction</a>
+<div class="nav-part">Part I — The Web</div>
+<a class="nav-link" href="chapter-01.html"><span class="nav-num">01</span> How the Web Works</a>
+<a class="nav-link" href="chapter-02.html"><span class="nav-num">02</span> URLs</a>
+<a class="nav-link" href="chapter-03.html"><span class="nav-num">03</span> HTTP Methods</a>
+<a class="nav-link" href="chapter-04.html"><span class="nav-num">04</span> Status Codes</a>
+<a class="nav-link" href="chapter-05.html"><span class="nav-num">05</span> Headers</a>
+<div class="nav-part">Part II — Requests</div>
+<a class="nav-link" href="chapter-06.html"><span class="nav-num">06</span> Installing Requests</a>
+<a class="nav-link" href="chapter-07.html"><span class="nav-num">07</span> GET Requests</a>
+<a class="nav-link" href="chapter-08.html"><span class="nav-num">08</span> Query Parameters</a>
+<a class="nav-link" href="chapter-09.html"><span class="nav-num">09</span> POST Requests</a>
+<a class="nav-link" href="chapter-10.html"><span class="nav-num">10</span> Authentication</a>
+<a class="nav-link" href="chapter-11.html"><span class="nav-num">11</span> Error Handling</a>
+<div class="nav-part">Part III — APIs</div>
+<a class="nav-link" href="chapter-12.html"><span class="nav-num">12</span> What is a REST API?</a>
+<a class="nav-link" href="chapter-13.html"><span class="nav-num">13</span> Working with JSON</a>
+<a class="nav-link" href="chapter-14.html"><span class="nav-num">14</span> Real API: OpenWeather</a>
+<a class="nav-link" href="chapter-15.html"><span class="nav-num">15</span> Real API: GitHub</a>
+<div class="nav-part">Part IV — Projects</div>
+<a class="nav-link active" href="project-01.html"><span class="nav-num">P1</span> Weather CLI</a>
+<a class="nav-link" href="project-02.html"><span class="nav-num">P2</span> GitHub Repo Finder</a>
+<a class="nav-link" href="project-03.html"><span class="nav-num">P3</span> News Aggregator</a>
+<div class="nav-part">Reference</div>
+<a class="nav-link" href="glossary.html"><span class="nav-num">—</span> Glossary</a>
+<a class="nav-link" href="cheatsheet.html"><span class="nav-num">—</span> Cheat Sheet</a>
+</div>
+    <div class="sidebar-footer">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+      <span class="progress-label">Project 1 of 3</span>
+    </div>
+  </nav>
+  <main class="main"><div class="chapter-content">
+    <div class="chapter-eyebrow">Part IV — Projects · Project 1</div>
+    <h1 class="chapter-title">Project 1: Weather CLI</h1>
+    <p class="chapter-lead">Your first complete project. A real command-line program that fetches live weather for any city using the OpenWeatherMap API.</p>
+    
+<div class="callout concept">
+<div class="callout-title">🚀 Project overview</div>
+<div class="callout-body">
+<p>Build a command-line weather application that fetches real-time conditions for any city. This project combines everything from Part I–III: URLs, auth, GET requests, JSON parsing, and error handling.</p>
+<p><strong>Skills used:</strong> requests.get() · params= · headers= · response.json() · os.environ · error handling · f-strings</p>
+</div>
+</div>
+
+<h2>What You'll Build</h2>
+<pre>$ python weather.py
+City: Accra
+Units (C/F) [C]: C
+
+🌤  Weather in Accra, GH
+────────────────────────
+Temperature : 29.1°C  (feels like 32.4°C)
+Conditions  : partly cloudy
+Humidity    : 81%
+Wind        : 3.8 m/s
+Visibility  : 10 km</pre>
+
+<h2>Step 1 — Setup</h2>
+<pre><span class="cm"># weather.py</span>
+<span class="kw">import</span> os
+<span class="kw">import</span> requests
+
+BASE_URL = <span class="str">"https://api.openweathermap.org/data/2.5/weather"</span>
+
+<span class="kw">def</span> <span class="fn">get_api_key</span>():
+    key = os.environ.<span class="fn">get</span>(<span class="str">"OWM_API_KEY"</span>)
+    <span class="kw">if not</span> key:
+        <span class="kw">raise</span> <span class="cls">EnvironmentError</span>(<span class="str">"Set OWM_API_KEY environment variable first."</span>)
+    <span class="kw">return</span> key</pre>
+
+<h2>Step 2 — Fetch Function</h2>
+<pre><span class="kw">def</span> <span class="fn">fetch_weather</span>(city, api_key, units=<span class="str">"metric"</span>):
+    <span class="kw">try</span>:
+        response = requests.<span class="fn">get</span>(
+            BASE_URL,
+            params={<span class="str">"q"</span>: city, <span class="str">"appid"</span>: api_key, <span class="str">"units"</span>: units},
+            timeout=<span class="num">10</span>
+        )
+    <span class="kw">except</span> requests.exceptions.<span class="cls">ConnectionError</span>:
+        <span class="fn">print</span>(<span class="str">"No internet connection."</span>)
+        <span class="kw">return None</span>
+    <span class="kw">except</span> requests.exceptions.<span class="cls">Timeout</span>:
+        <span class="fn">print</span>(<span class="str">"Request timed out."</span>)
+        <span class="kw">return None</span>
+
+    <span class="kw">if</span> response.status_code == <span class="num">404</span>:
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"City '{city}' not found. Check spelling."</span>)
+        <span class="kw">return None</span>
+    <span class="kw">elif</span> response.status_code == <span class="num">401</span>:
+        <span class="fn">print</span>(<span class="str">"Invalid API key."</span>)
+        <span class="kw">return None</span>
+    <span class="kw">elif not</span> response.ok:
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Error {response.status_code}"</span>)
+        <span class="kw">return None</span>
+
+    <span class="kw">return</span> response.<span class="fn">json</span>()</pre>
+
+<h2>Step 3 — Display Function</h2>
+<pre><span class="kw">def</span> <span class="fn">display_weather</span>(data, units):
+    sym = <span class="str">"°C"</span> <span class="kw">if</span> units == <span class="str">"metric"</span> <span class="kw">else</span> <span class="str">"°F"</span>
+    city    = <span class="fn">f</span><span class="str">"{data['name']}, {data['sys']['country']}"</span>
+    temp    = data[<span class="str">"main"</span>][<span class="str">"temp"</span>]
+    feels   = data[<span class="str">"main"</span>][<span class="str">"feels_like"</span>]
+    hum     = data[<span class="str">"main"</span>][<span class="str">"humidity"</span>]
+    cond    = data[<span class="str">"weather"</span>][<span class="num">0</span>][<span class="str">"description"</span>]
+    wind    = data[<span class="str">"wind"</span>][<span class="str">"speed"</span>]
+    vis_m   = data.<span class="fn">get</span>(<span class="str">"visibility"</span>, <span class="num">0</span>)
+    vis_km  = <span class="fn">round</span>(vis_m / <span class="num">1000</span>, <span class="num">1</span>)
+
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"\n🌤  Weather in {city}"</span>)
+    <span class="fn">print</span>(<span class="str">"─" * 30</span>)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Temperature : {temp}{sym}  (feels like {feels}{sym})"</span>)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Conditions  : {cond}"</span>)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Humidity    : {hum}%"</span>)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Wind        : {wind} m/s"</span>)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Visibility  : {vis_km} km"</span>)</pre>
+
+<h2>Step 4 — Main Program</h2>
+<pre><span class="kw">def</span> <span class="fn">main</span>():
+    <span class="kw">try</span>:
+        api_key = <span class="fn">get_api_key</span>()
+    <span class="kw">except</span> <span class="cls">EnvironmentError</span> <span class="kw">as</span> e:
+        <span class="fn">print</span>(e); <span class="kw">return</span>
+
+    city = <span class="fn">input</span>(<span class="str">"City: "</span>).strip()
+    unit_input = <span class="fn">input</span>(<span class="str">"Units (C/F) [C]: "</span>).strip().<span class="fn">upper</span>()
+    units = <span class="str">"imperial"</span> <span class="kw">if</span> unit_input == <span class="str">"F"</span> <span class="kw">else</span> <span class="str">"metric"</span>
+
+    data = <span class="fn">fetch_weather</span>(city, api_key, units)
+    <span class="kw">if</span> data:
+        <span class="fn">display_weather</span>(data, units)
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    <span class="fn">main</span>()</pre>
+
+<h2>Extensions to Try</h2>
+<ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:6px;font-family:var(--font-sans);font-size:15px;">
+<li style="padding-left:16px;color:var(--text-muted);">· Accept city name as a command-line argument (<code>sys.argv</code>)</li>
+<li style="padding-left:16px;color:var(--text-muted);">· Add a 5-day forecast using the <code>/forecast</code> endpoint</li>
+<li style="padding-left:16px;color:var(--text-muted);">· Save results to a JSON file</li>
+<li style="padding-left:16px;color:var(--text-muted);">· Add emoji for different weather conditions (sunny ☀️, rainy 🌧️)</li>
+</ul>
+
+    <div class="chapter-nav">
+      <a class="nav-btn" href="chapter-15.html"><span class="nav-btn-dir">← Previous</span><span class="nav-btn-title">Chapter 15: Real API: GitHub</span></a>
+      <a class="nav-btn next" href="project-02.html"><span class="nav-btn-dir">Next →</span><span class="nav-btn-title">Project 2: GitHub Repo Finder</span></a>
+    </div>
+  </div></main>
+</div>
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<script src="../js/book.js"></script>
+</body></html>

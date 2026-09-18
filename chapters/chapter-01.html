@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 1 — How the Web Works | Practical HTTP with Python</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="book-title">Python · HTTP · APIs</div>
+      <div class="book-subtitle">Practical HTTP,<br>Requests & APIs</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-part">Front Matter</div>
+      <a class="nav-link" href="../index.html"><span class="nav-num">—</span> Introduction</a>
+      <div class="nav-part">Part I — The Web</div>
+      <a class="nav-link active" href="chapter-01.html"><span class="nav-num">01</span> How the Web Works</a>
+      <a class="nav-link" href="chapter-02.html"><span class="nav-num">02</span> URLs</a>
+      <a class="nav-link" href="chapter-03.html"><span class="nav-num">03</span> HTTP Methods</a>
+      <a class="nav-link" href="chapter-04.html"><span class="nav-num">04</span> Status Codes</a>
+      <a class="nav-link" href="chapter-05.html"><span class="nav-num">05</span> Headers</a>
+      <div class="nav-part">Part II — Requests</div>
+      <a class="nav-link" href="chapter-06.html"><span class="nav-num">06</span> Installing Requests</a>
+      <a class="nav-link" href="chapter-07.html"><span class="nav-num">07</span> GET Requests</a>
+      <a class="nav-link" href="chapter-08.html"><span class="nav-num">08</span> Query Parameters</a>
+      <a class="nav-link" href="chapter-09.html"><span class="nav-num">09</span> POST Requests</a>
+      <a class="nav-link" href="chapter-10.html"><span class="nav-num">10</span> Authentication</a>
+      <a class="nav-link" href="chapter-11.html"><span class="nav-num">11</span> Error Handling</a>
+      <div class="nav-part">Part III — APIs</div>
+      <a class="nav-link" href="chapter-12.html"><span class="nav-num">12</span> What is a REST API?</a>
+      <a class="nav-link" href="chapter-13.html"><span class="nav-num">13</span> Working with JSON</a>
+      <a class="nav-link" href="chapter-14.html"><span class="nav-num">14</span> Real API: OpenWeather</a>
+      <a class="nav-link" href="chapter-15.html"><span class="nav-num">15</span> Real API: GitHub</a>
+      <div class="nav-part">Part IV — Projects</div>
+      <a class="nav-link" href="project-01.html"><span class="nav-num">P1</span> Weather CLI</a>
+      <a class="nav-link" href="project-02.html"><span class="nav-num">P2</span> GitHub Repo Finder</a>
+      <a class="nav-link" href="project-03.html"><span class="nav-num">P3</span> News Aggregator</a>
+      <div class="nav-part">Reference</div>
+      <a class="nav-link" href="glossary.html"><span class="nav-num">—</span> Glossary</a>
+      <a class="nav-link" href="cheatsheet.html"><span class="nav-num">—</span> Cheat Sheet</a>
+    </div>
+    <div class="sidebar-footer">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+      <span class="progress-label">Chapter 1 of 15</span>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="chapter-content">
+
+      <div class="chapter-eyebrow">Part I — Understanding the Web · Chapter 1</div>
+      <h1 class="chapter-title">How the Web<br>Actually Works</h1>
+      <p class="chapter-lead">Before writing a single line of <code>requests</code> code, you need a mental picture of what's happening. This chapter builds that picture.</p>
+
+      <!-- Objectives -->
+      <div class="objectives">
+        <div class="objectives-title">🎯 What you'll learn</div>
+        <ul>
+          <li>What a client is, and what a server is</li>
+          <li>What HTTP and HTTPS mean</li>
+          <li>What a request and a response are</li>
+          <li>What happens when you visit a website</li>
+          <li>How Python fits into all of this</li>
+          <li>The difference between a website and an API</li>
+        </ul>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-title">💡 Reading tip</div>
+        <div class="callout-body">
+          <p>You don't need to memorize the definitions in this chapter. Understanding is the goal. The details will stick naturally as you write code in later chapters.</p>
+        </div>
+      </div>
+
+      <!-- 1.1 -->
+      <h2>1.1 The Internet vs. the Web</h2>
+      <p>People often use "the Internet" and "the Web" interchangeably, but they're not the same thing.</p>
+      <p>Think of the <strong>Internet</strong> as the underlying network — the cables, routers, and protocols that let computers communicate with each other at all.</p>
+      <p>The <strong>Web</strong> is one service that runs on top of that network — specifically, documents and data exchanged using HTTP.</p>
+      <p>But the Web isn't the only thing running on the Internet:</p>
+
+      <pre>Internet
+│
+├── Web (HTTP/HTTPS)      ← what we're learning
+├── Email (SMTP/IMAP)
+├── SSH
+├── Online games
+├── File transfers (FTP)
+└── Many other services</pre>
+
+      <p>When we learn HTTP and APIs, we're learning about one specific language that computers use to talk to each other over the Internet.</p>
+
+      <!-- 1.2 -->
+      <h2>1.2 Client and Server</h2>
+      <p>These two words appear everywhere in web development. They have specific meanings.</p>
+
+      <h3>Client</h3>
+      <p>A client is anything that <em>asks</em> a server for something. For example:</p>
+      <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:4px;margin-bottom:18px;">
+        <li style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);padding-left:16px;">· Chrome or Firefox</li>
+        <li style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);padding-left:16px;">· Your phone</li>
+        <li style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);padding-left:16px;">· A Python program</li>
+      </ul>
+
+      <h3>Server</h3>
+      <p>A server is a computer or program that receives requests and sends something back in response.</p>
+
+      <p>When you visit <code>https://example.com</code>, your browser is the client. The computer running example.com is the server.</p>
+
+      <div class="diagram">CLIENT                         SERVER
+
+Browser
+   │
+   │ "Give me this page"
+   │
+   └──────────────────────────────►
+                                  │
+                                  │
+   ◄──────────────────────────────┘
+        "Here is the page"</div>
+
+      <div class="callout concept">
+        <div class="callout-title">🔵 Key idea</div>
+        <div class="callout-body">
+          <p>Every web interaction is a client sending a request and a server sending a response. Keep this model in your head — it underpins everything else in this book.</p>
+        </div>
+      </div>
+
+      <!-- 1.3 -->
+      <h2>1.3 A Python Program Can Be a Client</h2>
+      <p>This is where things get interesting for us.</p>
+      <p>A browser isn't the only thing that can communicate with a server. Python can do it too. Instead of a browser making a request, we can write code that does it:</p>
+
+      <pre><span class="kw">import</span> requests
+
+response = requests.<span class="fn">get</span>(<span class="str">"https://example.com"</span>)</pre>
+
+      <p>At a high level, this means:</p>
+
+      <div class="diagram">Python program
+      │
+      │  HTTP request
+      ▼
+   Server
+      │
+      │  HTTP response
+      ▼
+Python program</div>
+
+      <p>That's the fundamental idea behind this entire book. Python sends a request; a server sends something back; Python uses that response.</p>
+
+      <!-- 1.4 -->
+      <h2>1.4 What Is a Request?</h2>
+      <p>A request is a message from a client to a server that says: <em>"I want something."</em></p>
+      <p>For example, a client might send:</p>
+
+      <pre>GET /products</pre>
+      <p style="color:var(--text-muted);font-style:italic;font-size:15px;margin-top:-10px;">"Give me the list of products."</p>
+
+      <pre>GET /weather</pre>
+      <p style="color:var(--text-muted);font-style:italic;font-size:15px;margin-top:-10px;">"Give me the current weather."</p>
+
+      <pre>POST /users</pre>
+      <p style="color:var(--text-muted);font-style:italic;font-size:15px;margin-top:-10px;">"Here is data. Create a new user with it."</p>
+
+      <p>We'll explore all the different types of requests in Chapter 3. For now, remember:</p>
+
+      <div class="callout concept">
+        <div class="callout-title">🔵 Request</div>
+        <div class="callout-body"><p>A message sent <strong>to</strong> the server by the client.</p></div>
+      </div>
+
+      <!-- 1.5 -->
+      <h2>1.5 What Is a Response?</h2>
+      <p>After receiving a request, the server sends something back. That's the response.</p>
+
+      <div class="diagram">Client
+  │
+  │ Request  →
+  ▼
+Server
+  │
+  │ Response ←
+  ▼
+Client</div>
+
+      <p>A response might contain:</p>
+      <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:4px;margin-bottom:18px;">
+        <li style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);padding-left:16px;">· HTML (a webpage)</li>
+        <li style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);padding-left:16px;">· JSON (structured data)</li>
+        <li style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);padding-left:16px;">· Plain text</li>
+        <li style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);padding-left:16px;">· Images or files</li>
+        <li style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);padding-left:16px;">· An error message</li>
+      </ul>
+
+      <p>When you visit a website, the response usually contains HTML. When you call an API, the response usually contains JSON. That distinction is very important — we'll come back to it in section 1.9.</p>
+
+      <!-- 1.6 -->
+      <h2>1.6 What Happens When You Visit a Website?</h2>
+      <p>Suppose you type <code>https://example.com</code> into your browser. A simplified version of what happens:</p>
+
+      <div class="diagram">You
+ │
+ │ type URL into browser
+ ▼
+Browser
+ │
+ │ sends HTTP request
+ ▼
+Server
+ │
+ │ sends HTTP response (HTML)
+ ▼
+Browser
+ │
+ │ renders the HTML
+ ▼
+Web page appears</div>
+
+      <p>The actual process involves more steps — DNS lookups, TCP connections, TLS handshakes — but those are network engineering details we don't need right now.</p>
+
+      <div class="callout tip">
+        <div class="callout-title">💡 Note</div>
+        <div class="callout-body"><p>We don't need to become network engineers to use the <code>requests</code> library. The library handles all of that for us. Our job is understanding what requests and responses <em>mean</em>.</p></div>
+      </div>
+
+      <!-- 1.7 -->
+      <h2>1.7 Where Does HTTP Come In?</h2>
+      <p>You might be thinking: how does the client and server know what format these messages should use? That's where HTTP comes in.</p>
+      <p><strong>HTTP</strong> stands for <strong>Hypertext Transfer Protocol</strong>. It's a set of rules that defines:</p>
+      <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:4px;margin-bottom:18px;">
+        <li style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);padding-left:16px;">· How requests are structured</li>
+        <li style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);padding-left:16px;">· How responses are structured</li>
+        <li style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);padding-left:16px;">· What different types of requests mean</li>
+        <li style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);padding-left:16px;">· How errors are reported</li>
+      </ul>
+
+      <p>Think of it as a shared language that clients and servers use to communicate.</p>
+
+      <div class="diagram">Python
+   │
+   │ HTTP request
+   ▼
+Server
+   │
+   │ HTTP response
+   ▼
+Python</div>
+
+      <!-- 1.8 -->
+      <h2>1.8 HTTPS</h2>
+      <p>Most websites use <code>https://</code> rather than <code>http://</code>. The <strong>S</strong> stands for <strong>Secure</strong>.</p>
+      <p>HTTPS is HTTP protected using <strong>TLS encryption</strong>. The practical difference:</p>
+
+      <div class="diagram">Plain HTTP
+
+Client ─────────────────────────── Server
+       data travels readable (anyone watching can see it)
+
+
+HTTPS
+
+Client ═════════════════════════════ Server
+       data is encrypted in transit (unreadable to observers)</div>
+
+      <p>This matters especially for passwords, API keys, tokens, and any personal data. When you use <code>requests</code>, you'll almost always use <code>https://</code> URLs, and the library handles the encryption automatically.</p>
+
+      <div class="callout concept">
+        <div class="callout-title">🔵 HTTPS = HTTP + TLS encryption</div>
+        <div class="callout-body"><p>You don't need to understand TLS internals. Just know that HTTPS keeps the communication private between client and server.</p></div>
+      </div>
+
+      <!-- 1.9 -->
+      <h2>1.9 Website vs. API</h2>
+      <p>This is one of the most important distinctions in this book.</p>
+      <p>Suppose you visit <code>https://example.com</code>. The server might return:</p>
+
+      <pre><span class="kw">&lt;h1&gt;</span>Welcome to Example!<span class="kw">&lt;/h1&gt;</span>
+<span class="kw">&lt;p&gt;</span>This is a webpage.<span class="kw">&lt;/p&gt;</span></pre>
+
+      <p>Your browser takes that HTML and renders it as a visual page.</p>
+      <p>But an <strong>API</strong> might return:</p>
+
+      <pre>{
+    <span class="str">"name"</span>: <span class="str">"Samuel"</span>,
+    <span class="str">"city"</span>: <span class="str">"Accra"</span>,
+    <span class="str">"temperature"</span>: <span class="num">28</span>
+}</pre>
+
+      <p>That's not intended for a human to read visually. It's data intended for a <em>program</em> to use.</p>
+
+      <div class="diagram">Website                     API
+
+Server                      Server
+  ↓                           ↓
+HTML                         JSON
+  ↓                           ↓
+Browser                    Python program
+  ↓                           ↓
+Visual page               Your code uses the data</div>
+
+      <p>This is a useful mental model. In practice there are exceptions, but this captures the key distinction: a website serves humans; an API serves programs.</p>
+
+      <!-- 1.10 -->
+      <h2>1.10 The Big Picture</h2>
+      <p>Here's everything from this chapter put together:</p>
+
+      <div class="diagram">                     INTERNET
+                          │
+             ┌────────────┴────────────┐
+             │                         │
+          CLIENT                     SERVER
+             │                         │
+      Browser / Python              Web application
+             │                         │
+             │       HTTP/HTTPS        │
+             │                         │
+             ├──────── REQUEST ────────►
+             │                         │
+             ◄──────── RESPONSE ───────┤
+             │
+             ▼
+      Use the returned data</div>
+
+      <p>When we're working with an API specifically, the flow looks like this:</p>
+
+      <div class="diagram">Python program
+      │
+      │  HTTP request
+      ▼
+API endpoint (server)
+      │
+      │  HTTP response
+      ▼
+   JSON data
+      │
+      ▼
+Python dict / list
+      │
+      ▼
+Your program does something with it</div>
+
+      <p>That's the core idea behind everything we're about to learn.</p>
+
+      <!-- Practice -->
+      <h2>Practice Questions</h2>
+      <p>Imagine you have a Python program that wants the current weather. It sends a request to <code>https://api.example.com/weather</code>, and the server responds with:</p>
+      <pre>{
+    <span class="str">"temperature"</span>: <span class="num">28</span>,
+    <span class="str">"condition"</span>: <span class="str">"Sunny"</span>
+}</pre>
+
+      <div class="exercise-block">
+        <div class="exercise-title">📝 Guided Practice</div>
+
+        <!-- Q1 -->
+        <div class="question" data-correct="B">
+          <div class="question-text">Question 1 — Who is the client in this scenario?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> The API server</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> Your Python program</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> The JSON response</li>
+          </ul>
+          <button class="reveal-btn" data-target="hint-q1" data-show-label="Show explanation" data-hide-label="Hide explanation">Show explanation</button>
+          <div class="reveal-content" id="hint-q1">
+            The Python program is the <strong>client</strong> because it's the one making the request — asking the server for something. The server is on the receiving end, waiting for requests to come in.
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="question" data-correct="B">
+          <div class="question-text">Question 2 — What is the request?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> {"temperature": 28, "condition": "Sunny"}</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> The message Python sends to the server</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> The Python program itself</li>
+          </ul>
+          <button class="reveal-btn" data-target="hint-q2" data-show-label="Show explanation" data-hide-label="Hide explanation">Show explanation</button>
+          <div class="reveal-content" id="hint-q2">
+            The <strong>request</strong> is the message sent <em>to</em> the server. The JSON is the response (what comes back). The Python program is the client, not the request itself.
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="question" data-correct="A">
+          <div class="question-text">Question 3 — What is the response?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> The information sent back by the server</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> The URL</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> Python's requests module</li>
+          </ul>
+          <button class="reveal-btn" data-target="hint-q3" data-show-label="Show explanation" data-hide-label="Hide explanation">Show explanation</button>
+          <div class="reveal-content" id="hint-q3">
+            The <strong>response</strong> is what the server sends back to the client. In this case it's the JSON containing temperature and condition.
+          </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="question" data-correct="B">
+          <div class="question-text">Question 4 — What is the API server sending back in this example?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> HTML</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> JSON</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> Python code</li>
+          </ul>
+          <button class="reveal-btn" data-target="hint-q4" data-show-label="Show explanation" data-hide-label="Hide explanation">Show explanation</button>
+          <div class="reveal-content" id="hint-q4">
+            APIs typically respond with <strong>JSON</strong> — structured data that a program can read and work with. HTML is what websites return for browsers to render visually.
+          </div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="question" data-correct="B">
+          <div class="question-text">Question 5 — What does HTTPS provide that plain HTTP doesn't?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> Faster Python code</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> Encrypted communication using TLS</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> A different programming language</li>
+          </ul>
+          <button class="reveal-btn" data-target="hint-q5" data-show-label="Show explanation" data-hide-label="Hide explanation">Show explanation</button>
+          <div class="reveal-content" id="hint-q5">
+            HTTPS is HTTP + TLS encryption. The data travelling between client and server is encrypted, so anyone observing the network can't simply read it.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Checkpoint -->
+      <div class="callout checkpoint">
+        <div class="callout-title">🧠 Checkpoint — Your Turn</div>
+        <div class="callout-body">
+          <p>Explain this in your own words — no textbook terminology required:</p>
+          <p><strong>What happens when a Python program communicates with an API?</strong></p>
+          <textarea class="checkpoint-input" placeholder="Write your explanation here… Think about: who sends what, what format the data is in, and what the Python program does with the result."></textarea>
+        </div>
+      </div>
+
+      <!-- Chapter nav -->
+      <div class="chapter-nav">
+        <a class="nav-btn" href="../index.html">
+          <span class="nav-btn-dir">← Previous</span>
+          <span class="nav-btn-title">Introduction</span>
+        </a>
+        <a class="nav-btn next" href="chapter-02.html">
+          <span class="nav-btn-dir">Next →</span>
+          <span class="nav-btn-title">Chapter 2: URLs</span>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<script src="../js/book.js"></script>
+</body>
+</html>

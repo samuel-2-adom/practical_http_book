@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 4 — Status Codes | Practical HTTP with Python</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="book-title">Python · HTTP · APIs</div>
+      <div class="book-subtitle">Practical HTTP,<br>Requests &amp; APIs</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-part">Front Matter</div>
+      <a class="nav-link" href="../index.html"><span class="nav-num">—</span> Introduction</a>
+      <div class="nav-part">Part I — The Web</div>
+      <a class="nav-link" href="chapter-01.html"><span class="nav-num">01</span> How the Web Works</a>
+      <a class="nav-link" href="chapter-02.html"><span class="nav-num">02</span> URLs</a>
+      <a class="nav-link" href="chapter-03.html"><span class="nav-num">03</span> HTTP Methods</a>
+      <a class="nav-link active" href="chapter-04.html"><span class="nav-num">04</span> Status Codes</a>
+      <a class="nav-link" href="chapter-05.html"><span class="nav-num">05</span> Headers</a>
+      <div class="nav-part">Part II — Requests</div>
+      <a class="nav-link" href="chapter-06.html"><span class="nav-num">06</span> Installing Requests</a>
+      <a class="nav-link" href="chapter-07.html"><span class="nav-num">07</span> GET Requests</a>
+      <a class="nav-link" href="chapter-08.html"><span class="nav-num">08</span> Query Parameters</a>
+      <a class="nav-link" href="chapter-09.html"><span class="nav-num">09</span> POST Requests</a>
+      <a class="nav-link" href="chapter-10.html"><span class="nav-num">10</span> Authentication</a>
+      <a class="nav-link" href="chapter-11.html"><span class="nav-num">11</span> Error Handling</a>
+      <div class="nav-part">Part III — APIs</div>
+      <a class="nav-link" href="chapter-12.html"><span class="nav-num">12</span> What is a REST API?</a>
+      <a class="nav-link" href="chapter-13.html"><span class="nav-num">13</span> Working with JSON</a>
+      <a class="nav-link" href="chapter-14.html"><span class="nav-num">14</span> Real API: OpenWeather</a>
+      <a class="nav-link" href="chapter-15.html"><span class="nav-num">15</span> Real API: GitHub</a>
+      <div class="nav-part">Part IV — Projects</div>
+      <a class="nav-link" href="project-01.html"><span class="nav-num">P1</span> Weather CLI</a>
+      <a class="nav-link" href="project-02.html"><span class="nav-num">P2</span> GitHub Repo Finder</a>
+      <a class="nav-link" href="project-03.html"><span class="nav-num">P3</span> News Aggregator</a>
+      <div class="nav-part">Reference</div>
+      <a class="nav-link" href="glossary.html"><span class="nav-num">—</span> Glossary</a>
+      <a class="nav-link" href="cheatsheet.html"><span class="nav-num">—</span> Cheat Sheet</a>
+    </div>
+    <div class="sidebar-footer">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+      <span class="progress-label">Chapter 4 of 15</span>
+    </div>
+  </nav>
+  <main class="main">
+    <div class="chapter-content">
+      <div class="chapter-eyebrow">Part I — Understanding the Web · Chapter 4</div>
+      <h1 class="chapter-title">Status Codes</h1>
+      <p class="chapter-lead">Every response from a server includes a three-digit number. That number tells you immediately whether things went well, and if not, whose fault it is.</p>
+
+      <div class="objectives">
+        <div class="objectives-title">🎯 What you'll learn</div>
+        <ul>
+          <li>What status codes are and how to read them</li>
+          <li>The five categories of status codes</li>
+          <li>The specific codes you'll encounter constantly</li>
+          <li>How to distinguish client errors from server errors</li>
+        </ul>
+      </div>
+
+      <h2>4.1 What Is a Status Code?</h2>
+      <p>Every HTTP response starts with a <strong>status code</strong> — a three-digit number that summarises the result of the request. The first digit tells you the category; the full number tells you the specifics.</p>
+
+      <div class="diagram">Client → request → Server
+Client ← response ← Server
+
+Response includes:
+  Status line:  HTTP/1.1 200 OK
+                         │   │
+                         │   └── human-readable phrase
+                         └────── status code
+  Headers: ...
+  Body: ...  (the data you asked for)</div>
+
+      <h2>4.2 The Five Categories</h2>
+
+      <div class="diagram">1xx — Informational   (rarely seen in practice)
+2xx — Success         ✅ the request worked
+3xx — Redirection     ↩️  go somewhere else
+4xx — Client error    ❌ you sent something wrong
+5xx — Server error    🔥 the server had a problem</div>
+
+      <div class="callout concept">
+        <div class="callout-title">🔵 The most important distinction</div>
+        <div class="callout-body">
+          <p><strong>4xx errors</strong> are your fault — your request was wrong, unauthorized, or asking for something that doesn't exist.</p>
+          <p><strong>5xx errors</strong> are the server's fault — the server crashed, is overloaded, or has a bug. Not your problem to fix.</p>
+        </div>
+      </div>
+
+      <h2>4.3 Success Codes (2xx)</h2>
+
+      <h3>200 OK</h3>
+      <p>The most common success code. Everything worked exactly as expected.</p>
+      <pre><span class="cm"># Typical response to a GET request</span>
+HTTP/1.1 200 OK
+<span class="cm"># Body contains the requested data</span></pre>
+
+      <h3>201 Created</h3>
+      <p>The request succeeded and a new resource was created. Typically returned after a successful POST.</p>
+      <pre><span class="cm"># Typical response after creating a resource</span>
+POST /users → 201 Created
+<span class="cm"># The new user now exists on the server</span></pre>
+
+      <h3>204 No Content</h3>
+      <p>Success, but there's nothing to return. Common after a DELETE or a PATCH that doesn't need to return data.</p>
+      <pre>DELETE /users/42 → 204 No Content
+<span class="cm"># User 42 is gone. Nothing to send back.</span></pre>
+
+      <h2>4.4 Redirect Codes (3xx)</h2>
+
+      <h3>301 Moved Permanently</h3>
+      <p>The resource has moved to a new URL permanently. The <code>requests</code> library follows redirects automatically, so you'll rarely need to handle these manually.</p>
+
+      <h3>302 Found (Temporary Redirect)</h3>
+      <p>Temporarily redirected to another URL. Again, <code>requests</code> handles this for you by default.</p>
+
+      <div class="callout tip">
+        <div class="callout-title">💡 Redirects are automatic</div>
+        <div class="callout-body"><p>By default, <code>requests</code> follows redirects automatically. If a URL moves, you'll get the final response without having to do anything. You can disable this with <code>allow_redirects=False</code> if you ever need to inspect the redirect itself.</p></div>
+      </div>
+
+      <h2>4.5 Client Error Codes (4xx) — Your fault</h2>
+      <p>These are the ones you'll encounter most when developing. They mean something about your request was wrong.</p>
+
+      <h3>400 Bad Request</h3>
+      <p>The server couldn't understand your request. Usually means malformed JSON, missing required fields, or invalid parameter values.</p>
+      <pre>POST /users
+Body: {name: "Samuel"}  <span class="cm">← invalid JSON (missing quotes)</span>
+→ 400 Bad Request</pre>
+
+      <h3>401 Unauthorized</h3>
+      <p>You need to authenticate but haven't. Either no credentials were sent, or they were invalid.</p>
+      <pre>GET /private/data   <span class="cm">← no API key sent</span>
+→ 401 Unauthorized</pre>
+
+      <h3>403 Forbidden</h3>
+      <p>You're authenticated, but you don't have permission for this action. The difference from 401: the server knows who you are, but says you can't do this.</p>
+      <pre><span class="cm"># You're logged in, but trying to delete another user's post</span>
+DELETE /users/99/posts/5 → 403 Forbidden</pre>
+
+      <h3>404 Not Found</h3>
+      <p>The resource doesn't exist. Either the URL is wrong or the thing you're asking for was deleted.</p>
+      <pre>GET /users/9999 → 404 Not Found
+<span class="cm"># User 9999 doesn't exist</span></pre>
+
+      <h3>422 Unprocessable Entity</h3>
+      <p>The request was understood (valid JSON, right format) but the data itself is invalid — like a user email that's already taken, or an age set to -5.</p>
+
+      <h3>429 Too Many Requests</h3>
+      <p>You've hit the API's rate limit — sent too many requests in a short period. Most APIs have a limit like "100 requests per minute". You'll need to wait before retrying.</p>
+      <pre>429 Too Many Requests
+Retry-After: 60   <span class="cm">← wait 60 seconds</span></pre>
+
+      <h2>4.6 Server Error Codes (5xx) — Their fault</h2>
+
+      <h3>500 Internal Server Error</h3>
+      <p>Something crashed on the server. There's nothing wrong with your request — the server just failed. Try again later.</p>
+
+      <h3>502 Bad Gateway</h3>
+      <p>The server was acting as a proxy and got a bad response from another server upstream. Often temporary.</p>
+
+      <h3>503 Service Unavailable</h3>
+      <p>The server is temporarily unavailable — overloaded, down for maintenance, or having a problem. Try again later.</p>
+
+      <div class="callout mistake">
+        <div class="callout-title">⚠️ Common mistake</div>
+        <div class="callout-body"><p>Beginners often assume a 500 error means their Python code is broken. It doesn't — it means the server has a problem. Always check the status code <em>before</em> debugging your code. If it's 5xx, the bug isn't yours.</p></div>
+      </div>
+
+      <h2>4.7 Checking Status Codes in Python</h2>
+      <p>In Python, you access the status code like this (more detail in Chapter 7):</p>
+      <pre><span class="kw">import</span> requests
+
+response = requests.<span class="fn">get</span>(<span class="str">"https://api.example.com/users/42"</span>)
+
+<span class="fn">print</span>(response.status_code)   <span class="cm"># e.g. 200</span>
+
+<span class="kw">if</span> response.status_code == <span class="num">200</span>:
+    <span class="fn">print</span>(<span class="str">"Success!"</span>)
+<span class="kw">elif</span> response.status_code == <span class="num">404</span>:
+    <span class="fn">print</span>(<span class="str">"Not found"</span>)
+<span class="kw">elif</span> response.status_code >= <span class="num">500</span>:
+    <span class="fn">print</span>(<span class="str">"Server error — not our fault"</span>)</pre>
+
+      <div class="exercise-block">
+        <div class="exercise-title">📝 Exercises</div>
+
+        <div class="question" data-correct="B">
+          <div class="question-text">Exercise 1 — You send a GET request and get back status 200. What does this mean?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> The resource was created</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> The request succeeded and the data was returned</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> The server is unavailable</li>
+          </ul>
+          <button class="reveal-btn" data-target="e4-1" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e4-1">200 OK is the standard success response. The request worked and the response body contains what you asked for.</div>
+        </div>
+
+        <div class="question" data-correct="C">
+          <div class="question-text">Exercise 2 — You get a 401. What should you check first?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> Whether the server is down</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> Whether the URL path is correct</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> Whether you've sent valid credentials/API key</li>
+          </ul>
+          <button class="reveal-btn" data-target="e4-2" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e4-2">401 means authentication failed. Check that you're sending your API key or token correctly — right header name, correct value, not expired.</div>
+        </div>
+
+        <div class="question" data-correct="A">
+          <div class="question-text">Exercise 3 — A 503 error appears. Is this a bug in your code?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> No — it's a server-side problem</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> Yes — check your request format</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> It depends on what you sent</li>
+          </ul>
+          <button class="reveal-btn" data-target="e4-3" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e4-3">5xx errors are always server-side problems. Your request was fine — the server itself is unavailable or crashed. Try again later; there's nothing to fix in your code.</div>
+        </div>
+
+        <div class="question" data-correct="B">
+          <div class="question-text">Exercise 4 — What's the difference between 401 and 403?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> 401 is a server error; 403 is a client error</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> 401 means not authenticated; 403 means authenticated but not allowed</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> They mean the same thing</li>
+          </ul>
+          <button class="reveal-btn" data-target="e4-4" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e4-4">401 = "Who are you? Prove it." (no valid credentials sent). 403 = "I know who you are, but you're not allowed to do this." (authenticated but unauthorized for this specific action).</div>
+        </div>
+      </div>
+
+      <div class="callout checkpoint">
+        <div class="callout-title">🧠 Checkpoint</div>
+        <div class="callout-body">
+          <p>Your Python program makes an API request and gets back a 429 status code. What happened, and what should your program do next?</p>
+          <textarea class="checkpoint-input" placeholder="Explain what 429 means and how you'd handle it…"></textarea>
+        </div>
+      </div>
+
+      <div class="callout concept">
+        <div class="callout-title">📌 Codes to memorize</div>
+        <div class="callout-body">
+          <p>✅ <strong>200</strong> OK · <strong>201</strong> Created · <strong>204</strong> No Content</p>
+          <p>❌ <strong>400</strong> Bad Request · <strong>401</strong> Unauthorized · <strong>403</strong> Forbidden · <strong>404</strong> Not Found · <strong>429</strong> Rate Limited</p>
+          <p>🔥 <strong>500</strong> Server Error · <strong>503</strong> Unavailable</p>
+          <p>Rule of thumb: <strong>4xx = your fault, 5xx = their fault</strong></p>
+        </div>
+      </div>
+
+      <div class="chapter-nav">
+        <a class="nav-btn" href="chapter-03.html">
+          <span class="nav-btn-dir">← Previous</span>
+          <span class="nav-btn-title">Chapter 3: HTTP Methods</span>
+        </a>
+        <a class="nav-btn next" href="chapter-05.html">
+          <span class="nav-btn-dir">Next →</span>
+          <span class="nav-btn-title">Chapter 5: Headers</span>
+        </a>
+      </div>
+    </div>
+  </main>
+</div>
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<script src="../js/book.js"></script>
+</body>
+</html>

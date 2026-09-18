@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 3 — HTTP Methods | Practical HTTP with Python</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="book-title">Python · HTTP · APIs</div>
+      <div class="book-subtitle">Practical HTTP,<br>Requests &amp; APIs</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-part">Front Matter</div>
+      <a class="nav-link" href="../index.html"><span class="nav-num">—</span> Introduction</a>
+      <div class="nav-part">Part I — The Web</div>
+      <a class="nav-link" href="chapter-01.html"><span class="nav-num">01</span> How the Web Works</a>
+      <a class="nav-link" href="chapter-02.html"><span class="nav-num">02</span> URLs</a>
+      <a class="nav-link active" href="chapter-03.html"><span class="nav-num">03</span> HTTP Methods</a>
+      <a class="nav-link" href="chapter-04.html"><span class="nav-num">04</span> Status Codes</a>
+      <a class="nav-link" href="chapter-05.html"><span class="nav-num">05</span> Headers</a>
+      <div class="nav-part">Part II — Requests</div>
+      <a class="nav-link" href="chapter-06.html"><span class="nav-num">06</span> Installing Requests</a>
+      <a class="nav-link" href="chapter-07.html"><span class="nav-num">07</span> GET Requests</a>
+      <a class="nav-link" href="chapter-08.html"><span class="nav-num">08</span> Query Parameters</a>
+      <a class="nav-link" href="chapter-09.html"><span class="nav-num">09</span> POST Requests</a>
+      <a class="nav-link" href="chapter-10.html"><span class="nav-num">10</span> Authentication</a>
+      <a class="nav-link" href="chapter-11.html"><span class="nav-num">11</span> Error Handling</a>
+      <div class="nav-part">Part III — APIs</div>
+      <a class="nav-link" href="chapter-12.html"><span class="nav-num">12</span> What is a REST API?</a>
+      <a class="nav-link" href="chapter-13.html"><span class="nav-num">13</span> Working with JSON</a>
+      <a class="nav-link" href="chapter-14.html"><span class="nav-num">14</span> Real API: OpenWeather</a>
+      <a class="nav-link" href="chapter-15.html"><span class="nav-num">15</span> Real API: GitHub</a>
+      <div class="nav-part">Part IV — Projects</div>
+      <a class="nav-link" href="project-01.html"><span class="nav-num">P1</span> Weather CLI</a>
+      <a class="nav-link" href="project-02.html"><span class="nav-num">P2</span> GitHub Repo Finder</a>
+      <a class="nav-link" href="project-03.html"><span class="nav-num">P3</span> News Aggregator</a>
+      <div class="nav-part">Reference</div>
+      <a class="nav-link" href="glossary.html"><span class="nav-num">—</span> Glossary</a>
+      <a class="nav-link" href="cheatsheet.html"><span class="nav-num">—</span> Cheat Sheet</a>
+    </div>
+    <div class="sidebar-footer">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+      <span class="progress-label">Chapter 3 of 15</span>
+    </div>
+  </nav>
+  <main class="main">
+    <div class="chapter-content">
+      <div class="chapter-eyebrow">Part I — Understanding the Web · Chapter 3</div>
+      <h1 class="chapter-title">HTTP Methods</h1>
+      <p class="chapter-lead">Every HTTP request has a <em>method</em> — a word that says what kind of action you want to perform. Understanding methods is what makes API documentation suddenly readable.</p>
+
+      <div class="objectives">
+        <div class="objectives-title">🎯 What you'll learn</div>
+        <ul>
+          <li>What HTTP methods are and why they exist</li>
+          <li>The four methods you'll use constantly: GET, POST, PUT/PATCH, DELETE</li>
+          <li>How methods map to CRUD operations</li>
+          <li>Which Python function corresponds to which method</li>
+        </ul>
+      </div>
+
+      <h2>3.1 Why Methods Exist</h2>
+      <p>Imagine you go to a library. You might want to:</p>
+      <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:4px;margin-bottom:18px;font-family:var(--font-sans);font-size:15px;">
+        <li style="padding-left:16px;color:var(--text-muted);">· <strong>Look up</strong> a book</li>
+        <li style="padding-left:16px;color:var(--text-muted);">· <strong>Add</strong> a new book to the collection</li>
+        <li style="padding-left:16px;color:var(--text-muted);">· <strong>Update</strong> the information about a book</li>
+        <li style="padding-left:16px;color:var(--text-muted);">· <strong>Remove</strong> a book from the collection</li>
+      </ul>
+      <p>These are fundamentally different operations. HTTP methods are how you tell the server which type of operation you want to perform — using the same URL but a different "verb".</p>
+
+      <h2>3.2 The Four Main Methods</h2>
+
+      <h3>GET — Retrieve something</h3>
+      <p><code>GET</code> requests information from the server. It doesn't change anything. It just asks: "Give me this."</p>
+      <pre>GET /users/42</pre>
+      <p style="color:var(--text-muted);font-style:italic;font-size:15px;margin-top:-10px;">"Give me the data for user 42."</p>
+      <pre>GET /products?category=books</pre>
+      <p style="color:var(--text-muted);font-style:italic;font-size:15px;margin-top:-10px;">"Give me all products in the books category."</p>
+
+      <div class="callout concept">
+        <div class="callout-title">🔵 GET is safe and idempotent</div>
+        <div class="callout-body"><p><strong>Safe</strong> means it doesn't change anything on the server. <strong>Idempotent</strong> means doing it ten times has the same result as doing it once. You can GET the same URL a hundred times without side effects. This is why browsers cache GET requests.</p></div>
+      </div>
+
+      <h3>POST — Create something new</h3>
+      <p><code>POST</code> sends data to the server to create a new resource.</p>
+      <pre>POST /users
+Body: {"name": "Samuel", "email": "s@example.com"}</pre>
+      <p style="color:var(--text-muted);font-style:italic;font-size:15px;margin-top:-10px;">"Create a new user with this data."</p>
+      <p>Notice POST usually has a <strong>body</strong> — data sent along with the request. GET requests typically don't have a body; POST requests usually do.</p>
+
+      <h3>PUT / PATCH — Update something</h3>
+      <p>Both methods update existing data, but with a subtle difference:</p>
+      <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:6px;margin-bottom:18px;font-family:var(--font-sans);font-size:15px;">
+        <li style="padding-left:16px;color:var(--text-muted);">· <code>PUT</code> — replace the entire resource with new data</li>
+        <li style="padding-left:16px;color:var(--text-muted);">· <code>PATCH</code> — update only the fields you specify</li>
+      </ul>
+      <pre>PUT /users/42
+Body: {"name": "Sam", "email": "sam@example.com", "city": "Accra"}
+<span class="cm"># Replaces the entire user record</span>
+
+PATCH /users/42
+Body: {"city": "Kumasi"}
+<span class="cm"># Only updates the city field</span></pre>
+      <p>In practice, many APIs only implement one of these. PATCH is increasingly preferred.</p>
+
+      <h3>DELETE — Remove something</h3>
+      <p><code>DELETE</code> tells the server to remove the specified resource.</p>
+      <pre>DELETE /users/42</pre>
+      <p style="color:var(--text-muted);font-style:italic;font-size:15px;margin-top:-10px;">"Delete user 42."</p>
+
+      <h2>3.3 CRUD and HTTP Methods</h2>
+      <p>You may have heard of <strong>CRUD</strong> — Create, Read, Update, Delete. These four operations map directly onto HTTP methods:</p>
+
+      <div class="diagram">CRUD Operation    HTTP Method    requests function
+─────────────────────────────────────────────────
+Create            POST           requests.post()
+Read              GET            requests.get()
+Update            PUT / PATCH    requests.put() / requests.patch()
+Delete            DELETE         requests.delete()</div>
+
+      <p>This mapping is at the heart of REST APIs, which we'll cover properly in Chapter 12. For now, just notice the pattern: the method tells the server <em>what kind of thing</em> you want to do, and the URL tells it <em>what you want to do it to</em>.</p>
+
+      <h2>3.4 Methods You'll Use Less Often</h2>
+      <p>There are other HTTP methods, but you'll rarely need them when working with typical APIs:</p>
+      <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:6px;margin-bottom:18px;font-family:var(--font-sans);font-size:15px;">
+        <li style="padding-left:16px;color:var(--text-muted);">· <code>HEAD</code> — like GET, but returns only headers, no body (useful for checking if a resource exists)</li>
+        <li style="padding-left:16px;color:var(--text-muted);">· <code>OPTIONS</code> — asks what methods the server allows for a URL</li>
+      </ul>
+      <div class="callout tip">
+        <div class="callout-title">💡 Don't memorize these</div>
+        <div class="callout-body"><p>Know that <code>HEAD</code> and <code>OPTIONS</code> exist. Look them up if you ever need them. For 90% of API work, you'll only use GET, POST, PUT/PATCH, and DELETE.</p></div>
+      </div>
+
+      <h2>3.5 Reading API Docs — Methods in the Wild</h2>
+      <p>When you look at API documentation, the method is always listed first. For example, GitHub's API documentation might show:</p>
+
+      <div class="diagram">GET    /repos/{owner}/{repo}/issues     List issues
+POST   /repos/{owner}/{repo}/issues     Create an issue
+PATCH  /repos/{owner}/{repo}/issues/{n} Update an issue
+DELETE /repos/{owner}/{repo}/issues/{n} Delete an issue</div>
+
+      <p>Same URL pattern, different method — completely different operation. This is the pattern you'll see across virtually every modern API.</p>
+
+      <div class="exercise-block">
+        <div class="exercise-title">📝 Exercises</div>
+
+        <div class="question" data-correct="A">
+          <div class="question-text">Exercise 1 — You want to retrieve a list of blog posts. Which method?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> GET</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> POST</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> DELETE</li>
+          </ul>
+          <button class="reveal-btn" data-target="e3-1" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e3-1">GET — you're reading/retrieving data, not creating or modifying anything. In Python: <code>requests.get("/posts")</code>.</div>
+        </div>
+
+        <div class="question" data-correct="B">
+          <div class="question-text">Exercise 2 — You want to create a new comment on a post. Which method?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> GET</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> POST</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> PATCH</li>
+          </ul>
+          <button class="reveal-btn" data-target="e3-2" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e3-2">POST — you're creating a new resource. In Python: <code>requests.post("/posts/5/comments", json={"text": "Great post!"})</code>.</div>
+        </div>
+
+        <div class="question" data-correct="C">
+          <div class="question-text">Exercise 3 — You want to change just the title of an existing blog post. Which method is most appropriate?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> PUT</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> POST</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> PATCH</li>
+          </ul>
+          <button class="reveal-btn" data-target="e3-3" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e3-3">PATCH — you're updating only one field (the title), not replacing the entire post. PUT would require you to send the complete post data to replace it wholesale. PATCH is for partial updates.</div>
+        </div>
+
+        <div class="question" data-correct="A">
+          <div class="question-text">Exercise 4 — Which HTTP method is "safe" — meaning it doesn't modify server data?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> GET</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> POST</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> DELETE</li>
+          </ul>
+          <button class="reveal-btn" data-target="e3-4" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e3-4">GET — it only retrieves. POST creates, DELETE removes, PATCH/PUT modify. You can call GET any number of times and the server state won't change.</div>
+        </div>
+      </div>
+
+      <div class="callout checkpoint">
+        <div class="callout-title">🧠 Checkpoint</div>
+        <div class="callout-body">
+          <p>Without looking back: map each CRUD operation to its HTTP method and the Python <code>requests</code> function.</p>
+          <textarea class="checkpoint-input" placeholder="Create → ??? → requests.???()&#10;Read   → ??? → requests.???()&#10;Update → ??? → requests.???()&#10;Delete → ??? → requests.???()"></textarea>
+        </div>
+      </div>
+
+      <div class="callout concept">
+        <div class="callout-title">📌 What to remember</div>
+        <div class="callout-body">
+          <p>· <strong>GET</strong> — read, retrieve, fetch (no body, safe)</p>
+          <p>· <strong>POST</strong> — create (has a body)</p>
+          <p>· <strong>PUT/PATCH</strong> — update (PUT replaces all, PATCH updates part)</p>
+          <p>· <strong>DELETE</strong> — remove</p>
+          <p>The method + URL together define the operation.</p>
+        </div>
+      </div>
+
+      <div class="chapter-nav">
+        <a class="nav-btn" href="chapter-02.html">
+          <span class="nav-btn-dir">← Previous</span>
+          <span class="nav-btn-title">Chapter 2: URLs</span>
+        </a>
+        <a class="nav-btn next" href="chapter-04.html">
+          <span class="nav-btn-dir">Next →</span>
+          <span class="nav-btn-title">Chapter 4: Status Codes</span>
+        </a>
+      </div>
+    </div>
+  </main>
+</div>
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<script src="../js/book.js"></script>
+</body>
+</html>

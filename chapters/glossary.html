@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glossary | Practical HTTP with Python</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="book-title">Python · HTTP · APIs</div>
+      <div class="book-subtitle">Practical HTTP,<br>Requests &amp; APIs</div>
+    </div>
+    <div class="sidebar-nav"><div class="nav-part">Front Matter</div>
+<a class="nav-link" href="../index.html"><span class="nav-num">—</span> Introduction</a>
+<div class="nav-part">Part I — The Web</div>
+<a class="nav-link" href="chapter-01.html"><span class="nav-num">01</span> How the Web Works</a>
+<a class="nav-link" href="chapter-02.html"><span class="nav-num">02</span> URLs</a>
+<a class="nav-link" href="chapter-03.html"><span class="nav-num">03</span> HTTP Methods</a>
+<a class="nav-link" href="chapter-04.html"><span class="nav-num">04</span> Status Codes</a>
+<a class="nav-link" href="chapter-05.html"><span class="nav-num">05</span> Headers</a>
+<div class="nav-part">Part II — Requests</div>
+<a class="nav-link" href="chapter-06.html"><span class="nav-num">06</span> Installing Requests</a>
+<a class="nav-link" href="chapter-07.html"><span class="nav-num">07</span> GET Requests</a>
+<a class="nav-link" href="chapter-08.html"><span class="nav-num">08</span> Query Parameters</a>
+<a class="nav-link" href="chapter-09.html"><span class="nav-num">09</span> POST Requests</a>
+<a class="nav-link" href="chapter-10.html"><span class="nav-num">10</span> Authentication</a>
+<a class="nav-link" href="chapter-11.html"><span class="nav-num">11</span> Error Handling</a>
+<div class="nav-part">Part III — APIs</div>
+<a class="nav-link" href="chapter-12.html"><span class="nav-num">12</span> What is a REST API?</a>
+<a class="nav-link" href="chapter-13.html"><span class="nav-num">13</span> Working with JSON</a>
+<a class="nav-link" href="chapter-14.html"><span class="nav-num">14</span> Real API: OpenWeather</a>
+<a class="nav-link" href="chapter-15.html"><span class="nav-num">15</span> Real API: GitHub</a>
+<div class="nav-part">Part IV — Projects</div>
+<a class="nav-link" href="project-01.html"><span class="nav-num">P1</span> Weather CLI</a>
+<a class="nav-link" href="project-02.html"><span class="nav-num">P2</span> GitHub Repo Finder</a>
+<a class="nav-link" href="project-03.html"><span class="nav-num">P3</span> News Aggregator</a>
+<div class="nav-part">Reference</div>
+<a class="nav-link active" href="glossary.html"><span class="nav-num">—</span> Glossary</a>
+<a class="nav-link" href="cheatsheet.html"><span class="nav-num">—</span> Cheat Sheet</a>
+</div>
+    <div class="sidebar-footer">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+      <span class="progress-label">Reference</span>
+    </div>
+  </nav>
+  <main class="main"><div class="chapter-content">
+    
+<div class="chapter-eyebrow">Reference</div>
+<h1 class="chapter-title">Glossary</h1>
+<p class="chapter-lead">Every term used in this book, defined plainly.</p>
+
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">API</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">Application Programming Interface. A defined way for programs to communicate with each other over a network, usually using HTTP and JSON.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">API Key</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">A secret string that identifies you to an API. Sent with every request, usually in a header. Never hardcode in source files.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">Authentication</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">Proving your identity to a server. Common methods: API key, Bearer token, Basic auth.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">Bearer Token</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">An auth token sent in the Authorization header: <code>Authorization: Bearer TOKEN</code>.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">Body</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">The data payload of an HTTP request or response. GET requests have no body; POST/PUT/PATCH requests typically do.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">Client</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">Anything that makes HTTP requests: a browser, a mobile app, or a Python program.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">CRUD</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">Create, Read, Update, Delete. Maps to POST, GET, PUT/PATCH, DELETE.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">Endpoint</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">A specific URL where an API provides a resource or operation. E.g., <code>https://api.example.com/users</code>.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">Environment Variable</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">A variable set outside your code, used to pass secrets like API keys safely.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">Header</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">Metadata sent alongside HTTP requests and responses. Key-value pairs describing format, auth, rate limits, etc.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">HTTP</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">HyperText Transfer Protocol. The rules governing how clients and servers exchange requests and responses.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">HTTPS</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">HTTP + TLS encryption. Keeps data private in transit. Always use <code>https://</code> for API calls.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">Idempotent</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">An operation that produces the same result whether done once or many times. GET is idempotent; POST is not.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">JSON</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">JavaScript Object Notation. The text format most APIs use for structured data. Maps to Python dicts and lists.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">Method</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">The verb of an HTTP request: GET, POST, PUT, PATCH, DELETE.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">Pagination</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">Breaking large result sets into pages, controlled with <code>page</code> and <code>per_page</code> parameters.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">Path Parameter</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">A variable embedded in the URL path identifying a resource. The <code>42</code> in <code>/users/42</code>.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">Query Parameter</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">A key=value pair after the <code>?</code> in a URL, used to filter or modify a request.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">Rate Limit</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">A cap on how many API requests you can make per time period. Exceeded limits return 429.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">Request</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">A message sent from a client to a server asking for something or sending data.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">Resource</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">A thing in a REST API: a user, a post, a product. Each has its own URL.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">Response</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">The server's reply to a request. Contains a status code, headers, and usually a body.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">REST</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">Representational State Transfer. A style of API design that uses HTTP methods and resource URLs predictably.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">Server</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">A program that receives HTTP requests and sends responses.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">Status Code</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">A three-digit number indicating success (2xx), redirect (3xx), client error (4xx), or server error (5xx).</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">TLS</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">Transport Layer Security. The encryption protocol that makes HTTPS secure.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">Timeout</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">A limit on how long to wait for a server response. Set with <code>timeout=</code> in requests.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">Token</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">A credential used for authentication. See Bearer Token, API Key.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">URL</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">Uniform Resource Locator. The address of a resource: <code>scheme://host:port/path?query#fragment</code>.</div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-soft);">
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:6px;">URL Encoding</div>
+  <div style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);line-height:1.65;">Converting special characters to <code>%XX</code> hex codes. requests handles this automatically via <code>params=</code>.</div>
+</div>
+    <div class="chapter-nav">
+      <a class="nav-btn" href="project-03.html"><span class="nav-btn-dir">← Previous</span><span class="nav-btn-title">Project 3: News Aggregator</span></a>
+      <a class="nav-btn next" href="cheatsheet.html"><span class="nav-btn-dir">Next →</span><span class="nav-btn-title">Cheat Sheet</span></a>
+    </div>
+  </div></main>
+</div>
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<script src="../js/book.js"></script>
+</body></html>

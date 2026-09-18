@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project 3: News Aggregator | Practical HTTP with Python</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="book-title">Python · HTTP · APIs</div>
+      <div class="book-subtitle">Practical HTTP,<br>Requests &amp; APIs</div>
+    </div>
+    <div class="sidebar-nav"><div class="nav-part">Front Matter</div>
+<a class="nav-link" href="../index.html"><span class="nav-num">—</span> Introduction</a>
+<div class="nav-part">Part I — The Web</div>
+<a class="nav-link" href="chapter-01.html"><span class="nav-num">01</span> How the Web Works</a>
+<a class="nav-link" href="chapter-02.html"><span class="nav-num">02</span> URLs</a>
+<a class="nav-link" href="chapter-03.html"><span class="nav-num">03</span> HTTP Methods</a>
+<a class="nav-link" href="chapter-04.html"><span class="nav-num">04</span> Status Codes</a>
+<a class="nav-link" href="chapter-05.html"><span class="nav-num">05</span> Headers</a>
+<div class="nav-part">Part II — Requests</div>
+<a class="nav-link" href="chapter-06.html"><span class="nav-num">06</span> Installing Requests</a>
+<a class="nav-link" href="chapter-07.html"><span class="nav-num">07</span> GET Requests</a>
+<a class="nav-link" href="chapter-08.html"><span class="nav-num">08</span> Query Parameters</a>
+<a class="nav-link" href="chapter-09.html"><span class="nav-num">09</span> POST Requests</a>
+<a class="nav-link" href="chapter-10.html"><span class="nav-num">10</span> Authentication</a>
+<a class="nav-link" href="chapter-11.html"><span class="nav-num">11</span> Error Handling</a>
+<div class="nav-part">Part III — APIs</div>
+<a class="nav-link" href="chapter-12.html"><span class="nav-num">12</span> What is a REST API?</a>
+<a class="nav-link" href="chapter-13.html"><span class="nav-num">13</span> Working with JSON</a>
+<a class="nav-link" href="chapter-14.html"><span class="nav-num">14</span> Real API: OpenWeather</a>
+<a class="nav-link" href="chapter-15.html"><span class="nav-num">15</span> Real API: GitHub</a>
+<div class="nav-part">Part IV — Projects</div>
+<a class="nav-link" href="project-01.html"><span class="nav-num">P1</span> Weather CLI</a>
+<a class="nav-link" href="project-02.html"><span class="nav-num">P2</span> GitHub Repo Finder</a>
+<a class="nav-link active" href="project-03.html"><span class="nav-num">P3</span> News Aggregator</a>
+<div class="nav-part">Reference</div>
+<a class="nav-link" href="glossary.html"><span class="nav-num">—</span> Glossary</a>
+<a class="nav-link" href="cheatsheet.html"><span class="nav-num">—</span> Cheat Sheet</a>
+</div>
+    <div class="sidebar-footer">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+      <span class="progress-label">Project 3 of 3</span>
+    </div>
+  </nav>
+  <main class="main"><div class="chapter-content">
+    <div class="chapter-eyebrow">Part IV — Projects · Project 3</div>
+    <h1 class="chapter-title">Project 3: News Aggregator</h1>
+    <p class="chapter-lead">The final project. Fetch live news headlines on any topic, display them cleanly, and save a running log to a JSON file — a complete real-world automation.</p>
+    
+<div class="callout concept">
+<div class="callout-title">🚀 Project overview</div>
+<div class="callout-body">
+<p>Build a news aggregator that fetches top headlines for any topic using the NewsAPI. This project adds scheduled/repeated requests, saves results to a JSON log, and demonstrates a complete real-world automation pattern.</p>
+<p><strong>Skills used:</strong> API keys · GET · params · JSON · file I/O · datetime · all error handling patterns</p>
+</div>
+</div>
+
+<div class="callout tip">
+<div class="callout-title">💡 Setup: NewsAPI key</div>
+<div class="callout-body"><p>Register free at <a href="https://newsapi.org" style="color:var(--accent);">newsapi.org</a>. Free tier: 100 requests/day. Store as <code>export NEWS_API_KEY="your_key"</code>.</p></div>
+</div>
+
+<h2>What You'll Build</h2>
+<pre>$ python news.py
+Topic: artificial intelligence
+Country (us/gb/au) [us]: us
+Max articles [5]: 5
+
+📰 Top 5 headlines for "artificial intelligence"
+2024-01-15 09:32:41
+══════════════════════════════════════════════════
+1. OpenAI Releases New Model Surpassing Human...
+   Source: TechCrunch | 2024-01-15
+   https://techcrunch.com/...
+
+Saved to news_log.json (12 total entries)</pre>
+
+<h2>Complete Code</h2>
+<pre><span class="kw">import</span> os, json, requests
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+BASE = <span class="str">"https://newsapi.org/v2/everything"</span>
+
+<span class="kw">def</span> <span class="fn">fetch_news</span>(topic, page_size=<span class="num">5</span>):
+    api_key = os.environ.<span class="fn">get</span>(<span class="str">"NEWS_API_KEY"</span>)
+    <span class="kw">if not</span> api_key:
+        <span class="kw">raise</span> <span class="cls">EnvironmentError</span>(<span class="str">"Set NEWS_API_KEY"</span>)
+
+    <span class="kw">try</span>:
+        response = requests.<span class="fn">get</span>(
+            BASE,
+            params={
+                <span class="str">"q"</span>: topic,
+                <span class="str">"sortBy"</span>: <span class="str">"publishedAt"</span>,
+                <span class="str">"pageSize"</span>: page_size,
+                <span class="str">"language"</span>: <span class="str">"en"</span>,
+                <span class="str">"apiKey"</span>: api_key,
+            },
+            timeout=<span class="num">10</span>
+        )
+        response.<span class="fn">raise_for_status</span>()
+    <span class="kw">except</span> requests.exceptions.<span class="cls">HTTPError</span>:
+        err = response.<span class="fn">json</span>().<span class="fn">get</span>(<span class="str">"message"</span>, <span class="str">"HTTP error"</span>)
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"API error: {err}"</span>); <span class="kw">return</span> []
+    <span class="kw">except</span> requests.exceptions.<span class="cls">RequestException</span> <span class="kw">as</span> e:
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Connection error: {e}"</span>); <span class="kw">return</span> []
+
+    data = response.<span class="fn">json</span>()
+    <span class="kw">return</span> data.<span class="fn">get</span>(<span class="str">"articles"</span>, [])
+
+<span class="kw">def</span> <span class="fn">display_articles</span>(articles, topic):
+    now = datetime.<span class="fn">now</span>().<span class="fn">strftime</span>(<span class="str">"%Y-%m-%d %H:%M:%S"</span>)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"\n📰 Top {len(articles)} headlines for \"{topic}\""</span>)
+    <span class="fn">print</span>(now)
+    <span class="fn">print</span>(<span class="str">"═" * 50</span>)
+    <span class="kw">for</span> i, a <span class="kw">in</span> <span class="fn">enumerate</span>(articles, <span class="num">1</span>):
+        source = a.<span class="fn">get</span>(<span class="str">"source"</span>, {}).<span class="fn">get</span>(<span class="str">"name"</span>, <span class="str">"Unknown"</span>)
+        pub = (a.<span class="fn">get</span>(<span class="str">"publishedAt"</span>) <span class="kw">or</span> <span class="str">""</span>)[:<span class="num">10</span>]
+        title = a.<span class="fn">get</span>(<span class="str">"title"</span>, <span class="str">"No title"</span>)
+        url   = a.<span class="fn">get</span>(<span class="str">"url"</span>, <span class="str">""</span>)
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"\n{i}. {title}"</span>)
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"   Source: {source} | {pub}"</span>)
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"   {url}"</span>)
+
+<span class="kw">def</span> <span class="fn">save_to_log</span>(articles, topic, filename=<span class="str">"news_log.json"</span>):
+    <span class="cm"># Load existing log or start fresh</span>
+    <span class="kw">try</span>:
+        <span class="kw">with</span> <span class="fn">open</span>(filename) <span class="kw">as</span> f:
+            log = json.<span class="fn">load</span>(f)
+    <span class="kw">except</span> <span class="cls">FileNotFoundError</span>:
+        log = []
+
+    <span class="kw">for</span> a <span class="kw">in</span> articles:
+        log.<span class="fn">append</span>({
+            <span class="str">"topic"</span>: topic,
+            <span class="str">"fetched_at"</span>: datetime.<span class="fn">now</span>().<span class="fn">isoformat</span>(),
+            <span class="str">"title"</span>: a.<span class="fn">get</span>(<span class="str">"title"</span>),
+            <span class="str">"source"</span>: a.<span class="fn">get</span>(<span class="str">"source"</span>, {}).<span class="fn">get</span>(<span class="str">"name"</span>),
+            <span class="str">"url"</span>: a.<span class="fn">get</span>(<span class="str">"url"</span>),
+        })
+
+    <span class="kw">with</span> <span class="fn">open</span>(filename, <span class="str">"w"</span>) <span class="kw">as</span> f:
+        json.<span class="fn">dump</span>(log, f, indent=<span class="num">2</span>)
+
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"\nSaved to {filename} ({len(log)} total entries)"</span>)
+
+<span class="kw">def</span> <span class="fn">main</span>():
+    topic = <span class="fn">input</span>(<span class="str">"Topic: "</span>).strip()
+    max_a = <span class="fn">int</span>(<span class="fn">input</span>(<span class="str">"Max articles [5]: "</span>).strip() <span class="kw">or</span> <span class="num">5</span>)
+
+    articles = <span class="fn">fetch_news</span>(topic, max_a)
+    <span class="kw">if</span> articles:
+        <span class="fn">display_articles</span>(articles, topic)
+        <span class="fn">save_to_log</span>(articles, topic)
+    <span class="kw">else</span>:
+        <span class="fn">print</span>(<span class="str">"No articles found."</span>)
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    <span class="fn">main</span>()</pre>
+
+<h2>Extensions to Try</h2>
+<ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:6px;font-family:var(--font-sans);font-size:15px;">
+<li style="padding-left:16px;color:var(--text-muted);">· Filter articles to remove duplicates before saving</li>
+<li style="padding-left:16px;color:var(--text-muted);">· Run on a schedule with Python's <code>schedule</code> library</li>
+<li style="padding-left:16px;color:var(--text-muted);">· Add multiple topics, fetch all of them in one run</li>
+<li style="padding-left:16px;color:var(--text-muted);">· Send yourself an email summary using <code>smtplib</code></li>
+</ul>
+
+<div class="callout concept">
+<div class="callout-title">🎉 You've finished the book</div>
+<div class="callout-body">
+<p>You can now look at <code>https://api.example.com/users?sort=name&limit=10</code> and immediately understand every part of it. You know how to make GET and POST requests, handle authentication, parse JSON, deal with errors, and work with real APIs.</p>
+<p>Where to go from here: FastAPI (build your own APIs) · aiohttp (async HTTP) · Playwright (browser automation) · SQLAlchemy (store API data in databases).</p>
+</div>
+</div>
+
+    <div class="chapter-nav">
+      <a class="nav-btn" href="project-02.html"><span class="nav-btn-dir">← Previous</span><span class="nav-btn-title">Project 2: GitHub Repo Finder</span></a>
+      <a class="nav-btn next" href="glossary.html"><span class="nav-btn-dir">Next →</span><span class="nav-btn-title">Glossary</span></a>
+    </div>
+  </div></main>
+</div>
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<script src="../js/book.js"></script>
+</body></html>

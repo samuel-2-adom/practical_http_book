@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Practical HTTP, Requests & APIs with Python</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="book-title">Python · HTTP · APIs</div>
+      <div class="book-subtitle">Practical HTTP,<br>Requests & APIs</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-part">Front Matter</div>
+      <a class="nav-link active" href="index.html"><span class="nav-num">—</span> Introduction</a>
+      <div class="nav-part">Part I — The Web</div>
+      <a class="nav-link" href="chapters/chapter-01.html"><span class="nav-num">01</span> How the Web Works</a>
+      <a class="nav-link" href="chapters/chapter-02.html"><span class="nav-num">02</span> URLs</a>
+      <a class="nav-link" href="chapters/chapter-03.html"><span class="nav-num">03</span> HTTP Methods</a>
+      <a class="nav-link" href="chapters/chapter-04.html"><span class="nav-num">04</span> Status Codes</a>
+      <a class="nav-link" href="chapters/chapter-05.html"><span class="nav-num">05</span> Headers</a>
+      <div class="nav-part">Part II — Requests</div>
+      <a class="nav-link" href="chapters/chapter-06.html"><span class="nav-num">06</span> Installing Requests</a>
+      <a class="nav-link" href="chapters/chapter-07.html"><span class="nav-num">07</span> GET Requests</a>
+      <a class="nav-link" href="chapters/chapter-08.html"><span class="nav-num">08</span> Query Parameters</a>
+      <a class="nav-link" href="chapters/chapter-09.html"><span class="nav-num">09</span> POST Requests</a>
+      <a class="nav-link" href="chapters/chapter-10.html"><span class="nav-num">10</span> Authentication</a>
+      <a class="nav-link" href="chapters/chapter-11.html"><span class="nav-num">11</span> Error Handling</a>
+      <div class="nav-part">Part III — APIs</div>
+      <a class="nav-link" href="chapters/chapter-12.html"><span class="nav-num">12</span> What is a REST API?</a>
+      <a class="nav-link" href="chapters/chapter-13.html"><span class="nav-num">13</span> Working with JSON</a>
+      <a class="nav-link" href="chapters/chapter-14.html"><span class="nav-num">14</span> Real API: OpenWeather</a>
+      <a class="nav-link" href="chapters/chapter-15.html"><span class="nav-num">15</span> Real API: GitHub</a>
+      <div class="nav-part">Part IV — Projects</div>
+      <a class="nav-link" href="chapters/project-01.html"><span class="nav-num">P1</span> Weather CLI</a>
+      <a class="nav-link" href="chapters/project-02.html"><span class="nav-num">P2</span> GitHub Repo Finder</a>
+      <a class="nav-link" href="chapters/project-03.html"><span class="nav-num">P3</span> News Aggregator</a>
+      <div class="nav-part">Reference</div>
+      <a class="nav-link" href="chapters/glossary.html"><span class="nav-num">—</span> Glossary</a>
+      <a class="nav-link" href="chapters/cheatsheet.html"><span class="nav-num">—</span> Cheat Sheet</a>
+    </div>
+    <div class="sidebar-footer">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+      <span class="progress-label">Introduction</span>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="chapter-content">
+
+      <div class="chapter-eyebrow">Introduction</div>
+      <h1 class="chapter-title">Practical HTTP,<br>Requests & APIs<br>with Python</h1>
+      <p class="chapter-lead">You already know Python. Now learn how Python talks to the web — so you can fetch data, call APIs, and build programs that connect to the world outside your machine.</p>
+
+      <h2>What this book is</h2>
+      <p>This is a hands-on guide to understanding HTTP and using Python's <code>requests</code> library to communicate with web servers and APIs.</p>
+      <p>It assumes you've already learned Python fundamentals — variables, functions, loops, data structures. If you've worked through something like <em>Think Python</em>, you're exactly the target reader.</p>
+      <p>What it <em>doesn't</em> assume is any prior knowledge of how the web works, what HTTP is, or what an API actually means beyond the buzzword.</p>
+
+      <h2>How to use this book</h2>
+      <p>Each chapter builds on the previous one. Read them in order, particularly Part I. The web-communication mental model matters — skipping it makes Part II harder than it needs to be.</p>
+      <p>Every chapter has:</p>
+      <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:6px;margin-bottom:18px;">
+        <li style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);padding-left:20px;position:relative;"><span style="position:absolute;left:0;color:var(--accent);font-family:var(--font-mono);font-size:12px;">→</span> A clear learning objective</li>
+        <li style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);padding-left:20px;position:relative;"><span style="position:absolute;left:0;color:var(--accent);font-family:var(--font-mono);font-size:12px;">→</span> Concept explanations with diagrams</li>
+        <li style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);padding-left:20px;position:relative;"><span style="position:absolute;left:0;color:var(--accent);font-family:var(--font-mono);font-size:12px;">→</span> Working code examples</li>
+        <li style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);padding-left:20px;position:relative;"><span style="position:absolute;left:0;color:var(--accent);font-family:var(--font-mono);font-size:12px;">→</span> Practice questions with reveal-able answers</li>
+        <li style="font-family:var(--font-sans);font-size:15px;color:var(--text-muted);padding-left:20px;position:relative;"><span style="position:absolute;left:0;color:var(--accent);font-family:var(--font-mono);font-size:12px;">→</span> A checkpoint to test your understanding</li>
+      </ul>
+
+      <div class="callout concept">
+        <div class="callout-title">🔵 A note on running code</div>
+        <div class="callout-body">
+          <p>Until Chapter 6 (Installing Requests), the examples won't run yet — we're building the mental model first. From Chapter 6 onward, every code block is meant to be run and experimented with.</p>
+        </div>
+      </div>
+
+      <h2>Book structure</h2>
+      <p><strong>Part I — Understanding the Web</strong> gives you the mental model: clients, servers, HTTP, URLs, methods, status codes, and headers. No Python yet, just understanding.</p>
+      <p><strong>Part II — The Requests Library</strong> is where we start writing code. You'll make real requests, handle responses, and deal with errors.</p>
+      <p><strong>Part III — Working with APIs</strong> moves from theory to practice. You'll call real, live APIs and process the data they return.</p>
+      <p><strong>Part IV — Projects</strong> puts it all together in three complete programs you build from scratch.</p>
+
+      <div class="chapter-nav">
+        <span class="nav-btn disabled">
+          <span class="nav-btn-dir">← Previous</span>
+          <span class="nav-btn-title">—</span>
+        </span>
+        <a class="nav-btn next" href="chapters/chapter-01.html">
+          <span class="nav-btn-dir">Next →</span>
+          <span class="nav-btn-title">Chapter 1: How the Web Works</span>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<script src="js/book.js"></script>
+</body>
+</html>

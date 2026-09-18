@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 11 — Error Handling | Practical HTTP with Python</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="book-title">Python · HTTP · APIs</div>
+      <div class="book-subtitle">Practical HTTP,<br>Requests &amp; APIs</div>
+    </div>
+    <div class="sidebar-nav"><div class="nav-part">Front Matter</div>
+<a class="nav-link" href="../index.html"><span class="nav-num">—</span> Introduction</a>
+<div class="nav-part">Part I — The Web</div>
+<a class="nav-link" href="chapter-01.html"><span class="nav-num">01</span> How the Web Works</a>
+<a class="nav-link" href="chapter-02.html"><span class="nav-num">02</span> URLs</a>
+<a class="nav-link" href="chapter-03.html"><span class="nav-num">03</span> HTTP Methods</a>
+<a class="nav-link" href="chapter-04.html"><span class="nav-num">04</span> Status Codes</a>
+<a class="nav-link" href="chapter-05.html"><span class="nav-num">05</span> Headers</a>
+<div class="nav-part">Part II — Requests</div>
+<a class="nav-link" href="chapter-06.html"><span class="nav-num">06</span> Installing Requests</a>
+<a class="nav-link" href="chapter-07.html"><span class="nav-num">07</span> GET Requests</a>
+<a class="nav-link" href="chapter-08.html"><span class="nav-num">08</span> Query Parameters</a>
+<a class="nav-link" href="chapter-09.html"><span class="nav-num">09</span> POST Requests</a>
+<a class="nav-link" href="chapter-10.html"><span class="nav-num">10</span> Authentication</a>
+<a class="nav-link active" href="chapter-11.html"><span class="nav-num">11</span> Error Handling</a>
+<div class="nav-part">Part III — APIs</div>
+<a class="nav-link" href="chapter-12.html"><span class="nav-num">12</span> What is a REST API?</a>
+<a class="nav-link" href="chapter-13.html"><span class="nav-num">13</span> Working with JSON</a>
+<a class="nav-link" href="chapter-14.html"><span class="nav-num">14</span> Real API: OpenWeather</a>
+<a class="nav-link" href="chapter-15.html"><span class="nav-num">15</span> Real API: GitHub</a>
+<div class="nav-part">Part IV — Projects</div>
+<a class="nav-link" href="project-01.html"><span class="nav-num">P1</span> Weather CLI</a>
+<a class="nav-link" href="project-02.html"><span class="nav-num">P2</span> GitHub Repo Finder</a>
+<a class="nav-link" href="project-03.html"><span class="nav-num">P3</span> News Aggregator</a>
+<div class="nav-part">Reference</div>
+<a class="nav-link" href="glossary.html"><span class="nav-num">—</span> Glossary</a>
+<a class="nav-link" href="cheatsheet.html"><span class="nav-num">—</span> Cheat Sheet</a>
+</div>
+    <div class="sidebar-footer">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+      <span class="progress-label">Chapter 11 of 15</span>
+    </div>
+  </nav>
+  <main class="main"><div class="chapter-content">
+    <div class="chapter-eyebrow">Part II — Python Requests · Chapter 11</div>
+    <h1 class="chapter-title">Error Handling</h1>
+    <p class="chapter-lead">Real programs talk to real networks — and real networks fail. This chapter teaches you to write code that handles failure gracefully.</p>
+    
+<div class="objectives"><div class="objectives-title">🎯 What you'll learn</div><ul>
+<li>The two categories of errors: HTTP errors and network errors</li>
+<li>How to use raise_for_status()</li>
+<li>How to handle timeouts and connection failures</li>
+<li>Writing robust error handling for real programs</li>
+</ul></div>
+
+<h2>11.1 Two Kinds of Failure</h2>
+<p>When making HTTP requests, things can go wrong in two fundamentally different ways:</p>
+<div class="diagram">Network errors         HTTP errors
+────────────────────────────────────────
+The request never      The request reached
+reached the server     the server, but the
+(no internet, bad      server said "no"
+URL, server down)      (4xx, 5xx response)
+
+raise exceptions       return a response with
+automatically          a non-200 status code</div>
+
+<h2>11.2 HTTP Errors — raise_for_status()</h2>
+<p>By default, <code>requests</code> doesn't raise an exception for 4xx/5xx responses. You have to check manually — or use <code>raise_for_status()</code>:</p>
+<pre>response = requests.<span class="fn">get</span>(<span class="str">"https://httpbin.org/status/404"</span>)
+
+<span class="cm"># Without raise_for_status: no exception, status_code is 404</span>
+<span class="fn">print</span>(response.status_code)  <span class="cm"># 404 — no error raised</span>
+
+<span class="cm"># With raise_for_status:</span>
+response.<span class="fn">raise_for_status</span>()  <span class="cm"># raises HTTPError for 4xx/5xx</span></pre>
+<p>Use it in a try/except:</p>
+<pre><span class="kw">import</span> requests
+
+<span class="kw">try</span>:
+    response = requests.<span class="fn">get</span>(<span class="str">"https://httpbin.org/status/404"</span>)
+    response.<span class="fn">raise_for_status</span>()
+    data = response.<span class="fn">json</span>()
+<span class="kw">except</span> requests.exceptions.<span class="cls">HTTPError</span> <span class="kw">as</span> e:
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"HTTP error: {e}"</span>)</pre>
+
+<h2>11.3 Network Errors</h2>
+<p>If the request can't reach the server at all, you get an exception:</p>
+<pre><span class="kw">try</span>:
+    response = requests.<span class="fn">get</span>(<span class="str">"https://does-not-exist.example.com"</span>)
+<span class="kw">except</span> requests.exceptions.<span class="cls">ConnectionError</span> <span class="kw">as</span> e:
+    <span class="fn">print</span>(<span class="str">"Could not connect"</span>)</pre>
+
+<h2>11.4 Timeouts</h2>
+<p>Never let a request hang forever. Always set a timeout:</p>
+<pre><span class="kw">try</span>:
+    response = requests.<span class="fn">get</span>(url, timeout=<span class="num">10</span>)  <span class="cm"># 10 seconds</span>
+<span class="kw">except</span> requests.exceptions.<span class="cls">Timeout</span>:
+    <span class="fn">print</span>(<span class="str">"Request timed out"</span>)</pre>
+<p>You can also set separate connect and read timeouts:</p>
+<pre>timeout=(<span class="num">3</span>, <span class="num">10</span>)  <span class="cm"># 3s to connect, 10s to read</span></pre>
+
+<h2>11.5 The Exception Hierarchy</h2>
+<div class="diagram">requests.exceptions.RequestException   (catch-all)
+├── ConnectionError       (can't connect)
+├── Timeout               (took too long)
+├── HTTPError             (4xx / 5xx response)
+└── TooManyRedirects      (redirect loop)</div>
+<p><code>RequestException</code> is the base class. Catching it catches everything:</p>
+<pre><span class="kw">try</span>:
+    response = requests.<span class="fn">get</span>(url, timeout=<span class="num">10</span>)
+    response.<span class="fn">raise_for_status</span>()
+    <span class="kw">return</span> response.<span class="fn">json</span>()
+<span class="kw">except</span> requests.exceptions.<span class="cls">HTTPError</span> <span class="kw">as</span> e:
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"HTTP error {response.status_code}: {e}"</span>)
+<span class="kw">except</span> requests.exceptions.<span class="cls">ConnectionError</span>:
+    <span class="fn">print</span>(<span class="str">"No connection"</span>)
+<span class="kw">except</span> requests.exceptions.<span class="cls">Timeout</span>:
+    <span class="fn">print</span>(<span class="str">"Timed out"</span>)
+<span class="kw">except</span> requests.exceptions.<span class="cls">RequestException</span> <span class="kw">as</span> e:
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Unexpected error: {e}"</span>)</pre>
+
+<div class="exercise-block">
+<div class="exercise-title">📝 Exercises</div>
+<div class="question" data-correct="B">
+<div class="question-text">Exercise 1 — Does requests automatically raise an exception when it receives a 404?</div>
+<ul class="options">
+<li class="option" data-value="A"><span class="option-key">A</span> Yes — all 4xx and 5xx raise exceptions</li>
+<li class="option" data-value="B"><span class="option-key">B</span> No — you must call raise_for_status() or check status_code</li>
+<li class="option" data-value="C"><span class="option-key">C</span> Only 5xx raises exceptions; 4xx does not</li>
+</ul>
+<button class="reveal-btn" data-target="e11-1" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+<div class="reveal-content" id="e11-1">By default, requests does NOT raise exceptions for error status codes. A 404 or 500 returns a Response object with that status code. You raise the exception yourself with <code>raise_for_status()</code>.</div>
+</div>
+<div class="question" data-correct="C">
+<div class="question-text">Exercise 2 — What does <code>timeout=10</code> do?</div>
+<ul class="options">
+<li class="option" data-value="A"><span class="option-key">A</span> Waits up to 10 minutes for the server to respond</li>
+<li class="option" data-value="B"><span class="option-key">B</span> Retries the request 10 times</li>
+<li class="option" data-value="C"><span class="option-key">C</span> Raises a Timeout exception if the server doesn't respond within 10 seconds</li>
+</ul>
+<button class="reveal-btn" data-target="e11-2" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+<div class="reveal-content" id="e11-2">The timeout is in seconds. If the server hasn't responded within 10 seconds, requests raises a <code>Timeout</code> exception. Without a timeout, a slow or dead server can hang your program indefinitely.</div>
+</div>
+</div>
+
+<div class="callout checkpoint">
+<div class="callout-title">🧠 Checkpoint — Robust Request Function</div>
+<div class="callout-body">
+<p>Write a function <code>safe_get(url)</code> that makes a GET request with a 10-second timeout and returns the JSON data, or <code>None</code> if anything goes wrong (with a descriptive print statement for each error type).</p>
+<textarea class="checkpoint-input" style="min-height:140px;" placeholder="Write your solution…"></textarea>
+<button class="reveal-btn" data-target="ch11-sol" data-show-label="Show solution" data-hide-label="Hide">Show solution</button>
+<div class="reveal-content" id="ch11-sol"><pre><span class="kw">import</span> requests
+
+<span class="kw">def</span> <span class="fn">safe_get</span>(url):
+    <span class="kw">try</span>:
+        response = requests.<span class="fn">get</span>(url, timeout=<span class="num">10</span>)
+        response.<span class="fn">raise_for_status</span>()
+        <span class="kw">return</span> response.<span class="fn">json</span>()
+    <span class="kw">except</span> requests.exceptions.<span class="cls">HTTPError</span> <span class="kw">as</span> e:
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"HTTP error: {response.status_code}"</span>)
+    <span class="kw">except</span> requests.exceptions.<span class="cls">ConnectionError</span>:
+        <span class="fn">print</span>(<span class="str">"Connection failed — check your internet"</span>)
+    <span class="kw">except</span> requests.exceptions.<span class="cls">Timeout</span>:
+        <span class="fn">print</span>(<span class="str">"Request timed out after 10 seconds"</span>)
+    <span class="kw">except</span> requests.exceptions.<span class="cls">RequestException</span> <span class="kw">as</span> e:
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Unexpected error: {e}"</span>)
+    <span class="kw">return</span> <span class="kw">None</span></pre></div>
+</div>
+</div>
+
+    <div class="chapter-nav">
+      <a class="nav-btn" href="chapter-10.html"><span class="nav-btn-dir">← Previous</span><span class="nav-btn-title">Chapter 10: Authentication</span></a>
+      <a class="nav-btn next" href="chapter-12.html"><span class="nav-btn-dir">Next →</span><span class="nav-btn-title">Chapter 12: What is a REST API?</span></a>
+    </div>
+  </div></main>
+</div>
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<script src="../js/book.js"></script>
+</body></html>

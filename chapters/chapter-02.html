@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 2 — URLs | Practical HTTP with Python</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="book-title">Python · HTTP · APIs</div>
+      <div class="book-subtitle">Practical HTTP,<br>Requests &amp; APIs</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-part">Front Matter</div>
+      <a class="nav-link" href="../index.html"><span class="nav-num">—</span> Introduction</a>
+      <div class="nav-part">Part I — The Web</div>
+      <a class="nav-link" href="chapter-01.html"><span class="nav-num">01</span> How the Web Works</a>
+      <a class="nav-link active" href="chapter-02.html"><span class="nav-num">02</span> URLs</a>
+      <a class="nav-link" href="chapter-03.html"><span class="nav-num">03</span> HTTP Methods</a>
+      <a class="nav-link" href="chapter-04.html"><span class="nav-num">04</span> Status Codes</a>
+      <a class="nav-link" href="chapter-05.html"><span class="nav-num">05</span> Headers</a>
+      <div class="nav-part">Part II — Requests</div>
+      <a class="nav-link" href="chapter-06.html"><span class="nav-num">06</span> Installing Requests</a>
+      <a class="nav-link" href="chapter-07.html"><span class="nav-num">07</span> GET Requests</a>
+      <a class="nav-link" href="chapter-08.html"><span class="nav-num">08</span> Query Parameters</a>
+      <a class="nav-link" href="chapter-09.html"><span class="nav-num">09</span> POST Requests</a>
+      <a class="nav-link" href="chapter-10.html"><span class="nav-num">10</span> Authentication</a>
+      <a class="nav-link" href="chapter-11.html"><span class="nav-num">11</span> Error Handling</a>
+      <div class="nav-part">Part III — APIs</div>
+      <a class="nav-link" href="chapter-12.html"><span class="nav-num">12</span> What is a REST API?</a>
+      <a class="nav-link" href="chapter-13.html"><span class="nav-num">13</span> Working with JSON</a>
+      <a class="nav-link" href="chapter-14.html"><span class="nav-num">14</span> Real API: OpenWeather</a>
+      <a class="nav-link" href="chapter-15.html"><span class="nav-num">15</span> Real API: GitHub</a>
+      <div class="nav-part">Part IV — Projects</div>
+      <a class="nav-link" href="project-01.html"><span class="nav-num">P1</span> Weather CLI</a>
+      <a class="nav-link" href="project-02.html"><span class="nav-num">P2</span> GitHub Repo Finder</a>
+      <a class="nav-link" href="project-03.html"><span class="nav-num">P3</span> News Aggregator</a>
+      <div class="nav-part">Reference</div>
+      <a class="nav-link" href="glossary.html"><span class="nav-num">—</span> Glossary</a>
+      <a class="nav-link" href="cheatsheet.html"><span class="nav-num">—</span> Cheat Sheet</a>
+    </div>
+    <div class="sidebar-footer">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+      <span class="progress-label">Chapter 2 of 15</span>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="chapter-content">
+      <div class="chapter-eyebrow">Part I — Understanding the Web · Chapter 2</div>
+      <h1 class="chapter-title">URLs</h1>
+      <p class="chapter-lead">You've typed URLs thousands of times. Now you'll actually understand what each part means — and why that matters when you're writing code that talks to APIs.</p>
+
+      <div class="objectives">
+        <div class="objectives-title">🎯 What you'll learn</div>
+        <ul>
+          <li>Every component of a URL and what it does</li>
+          <li>What query parameters are and how they work</li>
+          <li>What URL encoding is</li>
+          <li>How to read an API URL and understand it immediately</li>
+        </ul>
+      </div>
+
+      <h2>2.1 A URL Is an Address</h2>
+      <p>A URL — Uniform Resource Locator — is the address of a resource on the web. That resource might be a webpage, an image, a JSON file, a video, or an API endpoint.</p>
+      <p>Every URL points to exactly one thing. When your Python program makes a request, it needs to know precisely <em>where</em> to send that request. That's the URL's job.</p>
+
+      <h2>2.2 Anatomy of a URL</h2>
+      <p>Take this URL apart:</p>
+
+      <pre>https://api.example.com:443/users/42?sort=asc&limit=10#profile</pre>
+
+      <div class="diagram">https://api.example.com:443/users/42?sort=asc&amp;limit=10#profile
+│       │               │   │        │              │
+│       │               │   │        │              └── fragment
+│       │               │   │        └─────────────── query string
+│       │               │   └──────────────────────── path
+│       │               └──────────────────────────── port
+│       └──────────────────────────────────────────── host / domain
+└──────────────────────────────────────────────────── scheme</div>
+
+      <p>Let's go through each part.</p>
+
+      <h2>2.3 Scheme (Protocol)</h2>
+      <p>The scheme tells the browser (or Python) <em>how</em> to communicate. It comes before the <code>://</code>.</p>
+      <pre>https://example.com
+│
+└── scheme: "https"</pre>
+      <p>Common schemes you'll see:</p>
+      <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:5px;margin-bottom:18px;font-family:var(--font-sans);font-size:15px;">
+        <li style="padding-left:16px;color:var(--text-muted);">· <code>http</code> — plain HTTP (unencrypted)</li>
+        <li style="padding-left:16px;color:var(--text-muted);">· <code>https</code> — HTTP + TLS encryption (what you should always use)</li>
+        <li style="padding-left:16px;color:var(--text-muted);">· <code>ftp</code> — file transfer (rare in modern APIs)</li>
+      </ul>
+      <div class="callout warning">
+        <div class="callout-title">⚠️ Always use https://</div>
+        <div class="callout-body"><p>When calling APIs, always use <code>https://</code>. Plain <code>http://</code> sends everything unencrypted — including your API keys and tokens. The <code>requests</code> library will follow HTTPS by default.</p></div>
+      </div>
+
+      <h2>2.4 Host (Domain)</h2>
+      <p>The host tells the client <em>which computer</em> to connect to.</p>
+      <pre>https://api.example.com/users
+        │
+        └── host: "api.example.com"</pre>
+      <p>You'll often see APIs using a subdomain like <code>api.</code> to separate the API from the main website:</p>
+      <pre>api.github.com       ← GitHub's API
+api.openweathermap.org  ← OpenWeather API
+api.spotify.com      ← Spotify API</pre>
+
+      <h2>2.5 Port</h2>
+      <p>The port is a number that specifies which "channel" on the server to connect to. Most of the time you don't see it because the default ports are assumed:</p>
+      <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:5px;margin-bottom:18px;font-family:var(--font-sans);font-size:15px;">
+        <li style="padding-left:16px;color:var(--text-muted);">· HTTP defaults to port <code>80</code></li>
+        <li style="padding-left:16px;color:var(--text-muted);">· HTTPS defaults to port <code>443</code></li>
+      </ul>
+      <p>When you <em>do</em> see a port, it's explicit:</p>
+      <pre>http://localhost:8000/api/users
+                 │
+                 └── port 8000 (a local development server)</pre>
+      <p>You'll often use explicit ports when running APIs locally during development.</p>
+
+      <h2>2.6 Path</h2>
+      <p>The path identifies the specific resource you want on the server. It comes after the host and always starts with <code>/</code>.</p>
+      <pre>https://api.example.com/users/42/posts
+                        │
+                        └── path: "/users/42/posts"</pre>
+      <p>In an API, paths usually map to resources:</p>
+      <pre>/users          → all users
+/users/42       → user with ID 42
+/users/42/posts → posts by user 42
+/products       → all products
+/products/7     → product with ID 7</pre>
+      <p>The number <code>42</code> in <code>/users/42</code> is called a <strong>path parameter</strong> — it's part of the URL path itself, identifying a specific resource. We'll come back to this in Chapter 8.</p>
+
+      <h2>2.7 Query String</h2>
+      <p>The query string comes after a <code>?</code> and contains key-value pairs separated by <code>&amp;</code>.</p>
+      <pre>https://api.example.com/search?q=python&sort=stars&page=2
+                               │
+                               └── query string starts here
+
+Key-value pairs:
+  q     = "python"
+  sort  = "stars"
+  page  = "2"</pre>
+      <p>Query parameters are used to <em>filter, sort, search, or configure</em> what the server returns. They don't identify a resource — they modify or narrow the request.</p>
+      <div class="callout concept">
+        <div class="callout-title">🔵 Path vs Query — the key distinction</div>
+        <div class="callout-body">
+          <p><strong>Path parameters</strong> identify which resource you want: <code>/users/42</code> — give me user 42 specifically.</p>
+          <p><strong>Query parameters</strong> modify how you want it: <code>/users?sort=name&limit=10</code> — give me users, sorted by name, ten at a time.</p>
+        </div>
+      </div>
+
+      <h2>2.8 Fragment</h2>
+      <p>The fragment comes after <code>#</code> and refers to a section within the page.</p>
+      <pre>https://docs.example.com/guide#authentication
+                               │
+                               └── jump to the "authentication" section</pre>
+      <p>Fragments are processed by the browser — they're never sent to the server. For APIs, you'll almost never use fragments, so don't worry about them much.</p>
+
+      <h2>2.9 URL Encoding</h2>
+      <p>URLs can only contain certain characters. Spaces, special characters, and non-ASCII text must be <strong>encoded</strong> — replaced with a <code>%</code> followed by a hex code.</p>
+      <pre>Space   →  %20
+#       →  %23
+&amp;       →  %26
+=       →  %3D
+?       →  %3F</pre>
+      <p>For example, if you're searching for "hello world", the URL becomes:</p>
+      <pre>https://api.example.com/search?q=hello%20world</pre>
+
+      <div class="callout tip">
+        <div class="callout-title">💡 Good news</div>
+        <div class="callout-body"><p>The <code>requests</code> library handles URL encoding automatically. You pass a Python dictionary and it builds the correctly-encoded URL. You rarely need to encode manually — but you should understand what you're seeing when a URL contains <code>%20</code> or similar.</p></div>
+      </div>
+
+      <h2>2.10 Reading API URLs</h2>
+      <p>Let's practice reading real API URLs you'll encounter:</p>
+
+      <pre>https://api.github.com/repos/python/cpython/issues?state=open&per_page=30</pre>
+      <div class="diagram">Scheme:  https
+Host:    api.github.com
+Path:    /repos/python/cpython/issues
+         │      │       │       │
+         │      │       │       └── resource: issues
+         │      │       └────────── repo name: cpython
+         │      └────────────────── owner: python
+         └───────────────────────── resource type: repos
+
+Query:   state=open   (only open issues)
+         per_page=30  (30 results per page)</div>
+
+      <pre>https://api.openweathermap.org/data/2.5/weather?q=Accra&units=metric&appid=KEY</pre>
+      <div class="diagram">Scheme:  https
+Host:    api.openweathermap.org
+Path:    /data/2.5/weather
+
+Query:   q=Accra        (city name)
+         units=metric   (Celsius, not Fahrenheit)
+         appid=KEY      (your API key)</div>
+
+      <p>Reading URLs like this — breaking them into their components — is a skill you'll use constantly when working with APIs.</p>
+
+      <!-- Practice -->
+      <h2>Practice Questions</h2>
+
+      <div class="exercise-block">
+        <div class="exercise-title">📝 Exercises</div>
+
+        <div class="question" data-correct="C">
+          <div class="question-text">Exercise 1 — In the URL <code>https://api.example.com/products?category=books</code>, what is the query parameter?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> /products</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> api.example.com</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> category=books</li>
+          </ul>
+          <button class="reveal-btn" data-target="e2-1" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e2-1">Everything after the <code>?</code> is the query string. Here it's <code>category=books</code> — a key of <code>category</code> with value <code>books</code>. The path is <code>/products</code> and the host is <code>api.example.com</code>.</div>
+        </div>
+
+        <div class="question" data-correct="B">
+          <div class="question-text">Exercise 2 — What does the <code>?</code> character separate?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> The scheme from the host</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> The path from the query string</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> Two query parameters from each other</li>
+          </ul>
+          <button class="reveal-btn" data-target="e2-2" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e2-2">The <code>?</code> marks where the path ends and the query string begins. The <code>&amp;</code> character separates individual query parameters from each other. The <code>://</code> separates the scheme from the host.</div>
+        </div>
+
+        <div class="question" data-correct="A">
+          <div class="question-text">Exercise 3 — You want to request user #99 from an API. Which URL structure is most typical?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> /users/99</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> /users?id=99</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> Both are equally common</li>
+          </ul>
+          <button class="reveal-btn" data-target="e2-3" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e2-3">Both patterns exist in the wild, but REST APIs (the most common style) typically use path parameters to identify specific resources: <code>/users/99</code>. Query parameters like <code>?id=99</code> are more often used for filtering or searching.</div>
+        </div>
+
+        <div class="question" data-correct="B">
+          <div class="question-text">Exercise 4 — Why does <code>https://api.example.com</code> not need to include <code>:443</code>?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> Because HTTPS doesn't use ports</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> Because 443 is the default HTTPS port, so it's implied</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> Because the port is always random</li>
+          </ul>
+          <button class="reveal-btn" data-target="e2-4" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e2-4">Port 443 is the default for HTTPS and port 80 is the default for HTTP. When you use the default, you can omit it. Ports only appear explicitly when something non-standard is being used — common in local development.</div>
+        </div>
+
+      </div>
+
+      <h2>Identify the Parts</h2>
+      <p>Break this URL into its components — try it without hints first:</p>
+      <pre>https://api.spotify.com/v1/search?q=jazz&type=track&limit=5</pre>
+      <button class="reveal-btn" data-target="url-breakdown" data-show-label="Show answer" data-hide-label="Hide answer">Show answer</button>
+      <div class="reveal-content" id="url-breakdown">
+        <pre>Scheme:  https
+Host:    api.spotify.com
+Path:    /v1/search       (v1 = API version 1)
+Query:
+  q      = "jazz"         (search term)
+  type   = "track"        (what kind of result)
+  limit  = "5"            (maximum results to return)</pre>
+      </div>
+
+      <div class="callout checkpoint">
+        <div class="callout-title">🧠 Checkpoint</div>
+        <div class="callout-body">
+          <p>Without looking back, write down what each symbol does in a URL: <code>://</code> &nbsp; <code>/</code> &nbsp; <code>?</code> &nbsp; <code>=</code> &nbsp; <code>&amp;</code> &nbsp; <code>#</code></p>
+          <textarea class="checkpoint-input" placeholder="Write your answer here…"></textarea>
+        </div>
+      </div>
+
+      <div class="callout concept">
+        <div class="callout-title">📌 What to remember from this chapter</div>
+        <div class="callout-body">
+          <p><code>scheme://host:port/path?key=value&amp;key2=value2#fragment</code></p>
+          <p>· <strong>Scheme</strong> — how to connect (<code>https</code>)</p>
+          <p>· <strong>Host</strong> — which server</p>
+          <p>· <strong>Path</strong> — which resource</p>
+          <p>· <strong>Query string</strong> — modify/filter the request</p>
+          <p>· <code>requests</code> handles URL encoding automatically</p>
+        </div>
+      </div>
+
+      <div class="chapter-nav">
+        <a class="nav-btn" href="chapter-01.html">
+          <span class="nav-btn-dir">← Previous</span>
+          <span class="nav-btn-title">Chapter 1: How the Web Works</span>
+        </a>
+        <a class="nav-btn next" href="chapter-03.html">
+          <span class="nav-btn-dir">Next →</span>
+          <span class="nav-btn-title">Chapter 3: HTTP Methods</span>
+        </a>
+      </div>
+    </div>
+  </main>
+</div>
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<script src="../js/book.js"></script>
+</body>
+</html>

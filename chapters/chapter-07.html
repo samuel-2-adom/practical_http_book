@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 7 — GET Requests | Practical HTTP with Python</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="book-title">Python · HTTP · APIs</div>
+      <div class="book-subtitle">Practical HTTP,<br>Requests &amp; APIs</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-part">Front Matter</div>
+      <a class="nav-link" href="../index.html"><span class="nav-num">—</span> Introduction</a>
+      <div class="nav-part">Part I — The Web</div>
+      <a class="nav-link" href="chapter-01.html"><span class="nav-num">01</span> How the Web Works</a>
+      <a class="nav-link" href="chapter-02.html"><span class="nav-num">02</span> URLs</a>
+      <a class="nav-link" href="chapter-03.html"><span class="nav-num">03</span> HTTP Methods</a>
+      <a class="nav-link" href="chapter-04.html"><span class="nav-num">04</span> Status Codes</a>
+      <a class="nav-link" href="chapter-05.html"><span class="nav-num">05</span> Headers</a>
+      <div class="nav-part">Part II — Requests</div>
+      <a class="nav-link" href="chapter-06.html"><span class="nav-num">06</span> Installing Requests</a>
+      <a class="nav-link active" href="chapter-07.html"><span class="nav-num">07</span> GET Requests</a>
+      <a class="nav-link" href="chapter-08.html"><span class="nav-num">08</span> Query Parameters</a>
+      <a class="nav-link" href="chapter-09.html"><span class="nav-num">09</span> POST Requests</a>
+      <a class="nav-link" href="chapter-10.html"><span class="nav-num">10</span> Authentication</a>
+      <a class="nav-link" href="chapter-11.html"><span class="nav-num">11</span> Error Handling</a>
+      <div class="nav-part">Part III — APIs</div>
+      <a class="nav-link" href="chapter-12.html"><span class="nav-num">12</span> What is a REST API?</a>
+      <a class="nav-link" href="chapter-13.html"><span class="nav-num">13</span> Working with JSON</a>
+      <a class="nav-link" href="chapter-14.html"><span class="nav-num">14</span> Real API: OpenWeather</a>
+      <a class="nav-link" href="chapter-15.html"><span class="nav-num">15</span> Real API: GitHub</a>
+      <div class="nav-part">Part IV — Projects</div>
+      <a class="nav-link" href="project-01.html"><span class="nav-num">P1</span> Weather CLI</a>
+      <a class="nav-link" href="project-02.html"><span class="nav-num">P2</span> GitHub Repo Finder</a>
+      <a class="nav-link" href="project-03.html"><span class="nav-num">P3</span> News Aggregator</a>
+      <div class="nav-part">Reference</div>
+      <a class="nav-link" href="glossary.html"><span class="nav-num">—</span> Glossary</a>
+      <a class="nav-link" href="cheatsheet.html"><span class="nav-num">—</span> Cheat Sheet</a>
+    </div>
+    <div class="sidebar-footer">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+      <span class="progress-label">Chapter 7 of 15</span>
+    </div>
+  </nav>
+  <main class="main">
+    <div class="chapter-content">
+      <div class="chapter-eyebrow">Part II — Python Requests · Chapter 7</div>
+      <h1 class="chapter-title">GET Requests</h1>
+      <p class="chapter-lead">GET is the method you'll use more than any other. This chapter covers everything about making GET requests — including how to pass parameters, inspect what was sent, and handle the response properly.</p>
+
+      <div class="objectives">
+        <div class="objectives-title">🎯 What you'll learn</div>
+        <ul>
+          <li>How to make GET requests to real URLs</li>
+          <li>How to pass query parameters using params=</li>
+          <li>How to inspect the full request that was sent</li>
+          <li>How to work with the response data</li>
+        </ul>
+      </div>
+
+      <h2>7.1 Basic GET</h2>
+      <p>You've already seen the basics. Let's make it concrete with a real public API — JSONPlaceholder, a free fake REST API for testing:</p>
+
+<pre><span class="kw">import</span> requests
+
+<span class="cm"># Get a list of posts</span>
+response = requests.<span class="fn">get</span>(<span class="str">"https://jsonplaceholder.typicode.com/posts"</span>)
+
+<span class="fn">print</span>(response.status_code)   <span class="cm"># 200</span>
+posts = response.<span class="fn">json</span>()
+<span class="fn">print</span>(<span class="fn">type</span>(posts))             <span class="cm"># &lt;class 'list'&gt;</span>
+<span class="fn">print</span>(<span class="fn">len</span>(posts))              <span class="cm"># 100</span>
+<span class="fn">print</span>(posts[<span class="num">0</span>])               <span class="cm"># {'userId': 1, 'id': 1, 'title': '...', 'body': '...'}</span></pre>
+
+      <h2>7.2 Getting a Specific Resource</h2>
+      <p>To get a single item, use a path parameter in the URL:</p>
+
+<pre><span class="cm"># Get post with ID 5</span>
+response = requests.<span class="fn">get</span>(<span class="str">"https://jsonplaceholder.typicode.com/posts/5"</span>)
+
+post = response.<span class="fn">json</span>()
+<span class="fn">print</span>(post[<span class="str">"title"</span>])   <span class="cm"># the title of post 5</span></pre>
+
+      <p>A common pattern is building the URL dynamically:</p>
+<pre>post_id = <span class="num">5</span>
+url = <span class="fn">f</span><span class="str">"https://jsonplaceholder.typicode.com/posts/{post_id}"</span>
+response = requests.<span class="fn">get</span>(url)</pre>
+
+      <h2>7.3 Query Parameters with params=</h2>
+      <p>For filtering or searching, pass query parameters as a dictionary using the <code>params=</code> argument. The library builds the correct URL for you:</p>
+
+<pre><span class="cm"># Get posts by user 1</span>
+params = {<span class="str">"userId"</span>: <span class="num">1</span>}
+response = requests.<span class="fn">get</span>(
+    <span class="str">"https://jsonplaceholder.typicode.com/posts"</span>,
+    params=params
+)
+
+<span class="cm"># The actual URL sent was:</span>
+<span class="cm"># https://jsonplaceholder.typicode.com/posts?userId=1</span>
+<span class="fn">print</span>(response.url)   <span class="cm"># confirms the URL that was used</span>
+
+posts = response.<span class="fn">json</span>()
+<span class="fn">print</span>(<span class="fn">len</span>(posts))  <span class="cm"># 10 (only user 1's posts)</span></pre>
+
+      <div class="callout concept">
+        <div class="callout-title">🔵 Always use params=, never build query strings manually</div>
+        <div class="callout-body">
+          <p>Don't do this:</p>
+          <pre style="margin:8px 0;">url = f"https://api.example.com/search?q={query}&page={page}"</pre>
+          <p>Do this:</p>
+          <pre style="margin:8px 0;">params = {"q": query, "page": page}
+requests.get(url, params=params)</pre>
+          <p>The library handles URL encoding automatically. Manual string building breaks when values contain spaces or special characters.</p>
+        </div>
+      </div>
+
+      <h2>7.4 Inspecting the Request That Was Sent</h2>
+      <p>The <code>response.request</code> attribute lets you see the actual request that was made:</p>
+
+<pre>params = {<span class="str">"q"</span>: <span class="str">"python tutorial"</span>, <span class="str">"page"</span>: <span class="num">2</span>}
+response = requests.<span class="fn">get</span>(<span class="str">"https://api.example.com/search"</span>, params=params)
+
+<span class="fn">print</span>(response.request.url)
+<span class="cm"># https://api.example.com/search?q=python+tutorial&page=2</span>
+
+<span class="fn">print</span>(response.request.method)
+<span class="cm"># GET</span>
+
+<span class="fn">print</span>(<span class="fn">dict</span>(response.request.headers))
+<span class="cm"># Shows all headers that were sent</span></pre>
+
+      <h2>7.5 A Real-World Pattern</h2>
+      <p>Here's the pattern you'll use in almost every real program:</p>
+
+<pre><span class="kw">import</span> requests
+
+<span class="kw">def</span> <span class="fn">get_user_posts</span>(user_id):
+    <span class="str">"""Fetch posts for a specific user."""</span>
+    url = <span class="str">"https://jsonplaceholder.typicode.com/posts"</span>
+    params = {<span class="str">"userId"</span>: user_id}
+
+    response = requests.<span class="fn">get</span>(url, params=params)
+
+    <span class="kw">if</span> response.status_code == <span class="num">200</span>:
+        <span class="kw">return</span> response.<span class="fn">json</span>()
+    <span class="kw">else</span>:
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Error: {response.status_code}"</span>)
+        <span class="kw">return</span> []
+
+posts = <span class="fn">get_user_posts</span>(<span class="num">3</span>)
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"Found {len(posts)} posts"</span>)
+<span class="kw">for</span> post <span class="kw">in</span> posts[:3]:
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">" - {post['title']}"</span>)</pre>
+
+      <div class="exercise-block">
+        <div class="exercise-title">📝 Exercises — Use JSONPlaceholder</div>
+
+        <div class="question" data-correct="B">
+          <div class="question-text">Exercise 1 — What's wrong with this code?<br><code>response = requests.get("api.example.com/users")</code></div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> Nothing — it works fine</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> The URL is missing the scheme (https://)</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> GET requires a params= argument</li>
+          </ul>
+          <button class="reveal-btn" data-target="e7-1" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e7-1">The URL must include the scheme. Without <code>https://</code>, requests doesn't know how to connect. It will raise a <code>MissingSchema</code> exception. Always write <code>https://api.example.com/users</code>.</div>
+        </div>
+
+        <div class="question" data-correct="C">
+          <div class="question-text">Exercise 2 — You want to request <code>/posts?userId=2&_limit=5</code>. Which code is correct?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> requests.get(url + "?userId=2&_limit=5")</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> requests.get(url, query={"userId": 2, "_limit": 5})</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> requests.get(url, params={"userId": 2, "_limit": 5})</li>
+          </ul>
+          <button class="reveal-btn" data-target="e7-2" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e7-2">Option C — the <code>params=</code> keyword argument accepts a dictionary and builds the query string automatically. Option A works but breaks with special characters. Option B uses the wrong keyword (<code>query</code> doesn't exist).</div>
+        </div>
+
+        <div class="question" data-correct="A">
+          <div class="question-text">Exercise 3 — How do you confirm exactly which URL was sent to the server?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> response.url or response.request.url</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> response.sent_url</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> requests.last_url()</li>
+          </ul>
+          <button class="reveal-btn" data-target="e7-3" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e7-3"><code>response.url</code> shows the final URL (after any redirects). <code>response.request.url</code> shows the URL of the request as it was prepared and sent.</div>
+        </div>
+      </div>
+
+      <div class="callout checkpoint">
+        <div class="callout-title">🧠 Mini-Project: Post Explorer</div>
+        <div class="callout-body">
+          <p>Write a program that:</p>
+          <ol style="list-style:none;padding:0;display:flex;flex-direction:column;gap:6px;font-family:var(--font-sans);font-size:14px;color:var(--text-muted);counter-reset:steps;">
+            <li style="padding-left:24px;position:relative;"><span style="position:absolute;left:0;color:var(--accent);font-family:var(--font-mono);">1.</span> Asks the user for a userId (1–10)</li>
+            <li style="padding-left:24px;position:relative;"><span style="position:absolute;left:0;color:var(--accent);font-family:var(--font-mono);">2.</span> Fetches their posts from <code>https://jsonplaceholder.typicode.com/posts</code></li>
+            <li style="padding-left:24px;position:relative;"><span style="position:absolute;left:0;color:var(--accent);font-family:var(--font-mono);">3.</span> Prints the number of posts found</li>
+            <li style="padding-left:24px;position:relative;"><span style="position:absolute;left:0;color:var(--accent);font-family:var(--font-mono);">4.</span> Prints the title of each post</li>
+          </ol>
+          <textarea class="checkpoint-input" style="min-height:140px;" placeholder="Write your solution here…"></textarea>
+          <button class="reveal-btn" data-target="ch7-solution" data-show-label="Show solution" data-hide-label="Hide solution">Show solution</button>
+          <div class="reveal-content" id="ch7-solution">
+<pre><span class="kw">import</span> requests
+
+user_id = <span class="fn">input</span>(<span class="str">"Enter a userId (1-10): "</span>)
+
+response = requests.<span class="fn">get</span>(
+    <span class="str">"https://jsonplaceholder.typicode.com/posts"</span>,
+    params={<span class="str">"userId"</span>: user_id}
+)
+
+<span class="kw">if</span> response.ok:
+    posts = response.<span class="fn">json</span>()
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"\nFound {len(posts)} posts for user {user_id}:\n"</span>)
+    <span class="kw">for</span> post <span class="kw">in</span> posts:
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">" - {post['title']}"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Error: {response.status_code}"</span>)</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="chapter-nav">
+        <a class="nav-btn" href="chapter-06.html">
+          <span class="nav-btn-dir">← Previous</span>
+          <span class="nav-btn-title">Chapter 6: Installing Requests</span>
+        </a>
+        <a class="nav-btn next" href="chapter-08.html">
+          <span class="nav-btn-dir">Next →</span>
+          <span class="nav-btn-title">Chapter 8: Query Parameters</span>
+        </a>
+      </div>
+    </div>
+  </main>
+</div>
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<script src="../js/book.js"></script>
+</body>
+</html>

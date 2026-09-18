@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 5 — Headers | Practical HTTP with Python</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="book-title">Python · HTTP · APIs</div>
+      <div class="book-subtitle">Practical HTTP,<br>Requests &amp; APIs</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-part">Front Matter</div>
+      <a class="nav-link" href="../index.html"><span class="nav-num">—</span> Introduction</a>
+      <div class="nav-part">Part I — The Web</div>
+      <a class="nav-link" href="chapter-01.html"><span class="nav-num">01</span> How the Web Works</a>
+      <a class="nav-link" href="chapter-02.html"><span class="nav-num">02</span> URLs</a>
+      <a class="nav-link" href="chapter-03.html"><span class="nav-num">03</span> HTTP Methods</a>
+      <a class="nav-link" href="chapter-04.html"><span class="nav-num">04</span> Status Codes</a>
+      <a class="nav-link active" href="chapter-05.html"><span class="nav-num">05</span> Headers</a>
+      <div class="nav-part">Part II — Requests</div>
+      <a class="nav-link" href="chapter-06.html"><span class="nav-num">06</span> Installing Requests</a>
+      <a class="nav-link" href="chapter-07.html"><span class="nav-num">07</span> GET Requests</a>
+      <a class="nav-link" href="chapter-08.html"><span class="nav-num">08</span> Query Parameters</a>
+      <a class="nav-link" href="chapter-09.html"><span class="nav-num">09</span> POST Requests</a>
+      <a class="nav-link" href="chapter-10.html"><span class="nav-num">10</span> Authentication</a>
+      <a class="nav-link" href="chapter-11.html"><span class="nav-num">11</span> Error Handling</a>
+      <div class="nav-part">Part III — APIs</div>
+      <a class="nav-link" href="chapter-12.html"><span class="nav-num">12</span> What is a REST API?</a>
+      <a class="nav-link" href="chapter-13.html"><span class="nav-num">13</span> Working with JSON</a>
+      <a class="nav-link" href="chapter-14.html"><span class="nav-num">14</span> Real API: OpenWeather</a>
+      <a class="nav-link" href="chapter-15.html"><span class="nav-num">15</span> Real API: GitHub</a>
+      <div class="nav-part">Part IV — Projects</div>
+      <a class="nav-link" href="project-01.html"><span class="nav-num">P1</span> Weather CLI</a>
+      <a class="nav-link" href="project-02.html"><span class="nav-num">P2</span> GitHub Repo Finder</a>
+      <a class="nav-link" href="project-03.html"><span class="nav-num">P3</span> News Aggregator</a>
+      <div class="nav-part">Reference</div>
+      <a class="nav-link" href="glossary.html"><span class="nav-num">—</span> Glossary</a>
+      <a class="nav-link" href="cheatsheet.html"><span class="nav-num">—</span> Cheat Sheet</a>
+    </div>
+    <div class="sidebar-footer">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+      <span class="progress-label">Chapter 5 of 15</span>
+    </div>
+  </nav>
+  <main class="main">
+    <div class="chapter-content">
+      <div class="chapter-eyebrow">Part I — Understanding the Web · Chapter 5</div>
+      <h1 class="chapter-title">Headers</h1>
+      <p class="chapter-lead">Headers are metadata that travel alongside every HTTP request and response. They're how the client and server communicate things like "what format is this data?" and "who are you?"</p>
+
+      <div class="objectives">
+        <div class="objectives-title">🎯 What you'll learn</div>
+        <ul>
+          <li>What headers are and where they live in a request/response</li>
+          <li>The headers you'll use most often as an API client</li>
+          <li>How to send headers with Python's requests library</li>
+          <li>How to read response headers</li>
+        </ul>
+      </div>
+
+      <h2>5.1 What Are Headers?</h2>
+      <p>Every HTTP request and response has two parts: <strong>headers</strong> and a <strong>body</strong>.</p>
+      <p>The body is the actual content — the JSON data, the HTML, the file. Headers are the metadata that describe the message itself: what format the body is in, who sent it, what kind of response is acceptable, and so on.</p>
+
+      <div class="diagram">HTTP Request
+─────────────────────────────────
+GET /users HTTP/1.1
+Host: api.example.com
+Authorization: Bearer abc123
+Accept: application/json
+User-Agent: MyApp/1.0
+                              ← headers end here (blank line)
+                              ← body starts (empty for GET)</div>
+
+      <div class="diagram">HTTP Response
+─────────────────────────────────
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 248
+X-RateLimit-Remaining: 58
+                              ← headers end here (blank line)
+{"id": 42, "name": "Samuel"}  ← body</div>
+
+      <p>Headers are key-value pairs, separated by a colon. They're case-insensitive (so <code>Content-Type</code> and <code>content-type</code> are the same), but by convention they use Title-Case.</p>
+
+      <h2>5.2 Important Request Headers</h2>
+
+      <h3>Authorization</h3>
+      <p>Used to send credentials — an API key or token — so the server knows who you are.</p>
+      <pre>Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
+Authorization: Basic dXNlcjpwYXNz
+Authorization: Token abc123def456</pre>
+      <p>We'll cover authentication in depth in Chapter 10. For now just know this header exists and carries credentials.</p>
+
+      <h3>Content-Type</h3>
+      <p>Tells the server what format the request <em>body</em> is in. Required when sending data.</p>
+      <pre>Content-Type: application/json        <span class="cm"># you're sending JSON</span>
+Content-Type: application/x-www-form-urlencoded  <span class="cm"># form data</span>
+Content-Type: multipart/form-data     <span class="cm"># file upload</span></pre>
+      <div class="callout tip">
+        <div class="callout-title">💡 Automatic with requests</div>
+        <div class="callout-body"><p>When you use <code>requests.post(..., json=data)</code>, the library automatically sets <code>Content-Type: application/json</code>. You only need to set it manually in unusual situations.</p></div>
+      </div>
+
+      <h3>Accept</h3>
+      <p>Tells the server what format <em>you want back</em>.</p>
+      <pre>Accept: application/json   <span class="cm"># please respond with JSON</span>
+Accept: text/html          <span class="cm"># please respond with HTML</span></pre>
+      <p>Most APIs return JSON regardless, but some can return multiple formats and use this header to decide.</p>
+
+      <h3>User-Agent</h3>
+      <p>Identifies the client making the request. Your browser sends something like <code>Mozilla/5.0...</code>. Python's requests library sends <code>python-requests/2.x.x</code>.</p>
+      <p>Some APIs check this — they might block unknown user agents or require you to identify your application. You can set a custom one:</p>
+      <pre>User-Agent: MyPythonApp/1.0</pre>
+
+      <h2>5.3 Important Response Headers</h2>
+
+      <h3>Content-Type</h3>
+      <p>Tells you what format the response body is in. Always check this if you're not sure what you got back.</p>
+      <pre>Content-Type: application/json; charset=utf-8
+Content-Type: text/html; charset=utf-8
+Content-Type: image/png</pre>
+
+      <h3>X-RateLimit-* headers</h3>
+      <p>Many APIs include headers that tell you about your rate limit usage:</p>
+      <pre>X-RateLimit-Limit: 100        <span class="cm"># max requests per period</span>
+X-RateLimit-Remaining: 73     <span class="cm"># how many you have left</span>
+X-RateLimit-Reset: 1700000000 <span class="cm"># when it resets (Unix timestamp)</span></pre>
+
+      <h3>Retry-After</h3>
+      <p>Sent with a 429 (Too Many Requests) to tell you how long to wait before retrying:</p>
+      <pre>HTTP/1.1 429 Too Many Requests
+Retry-After: 60   <span class="cm"># wait 60 seconds</span></pre>
+
+      <h2>5.4 Sending Headers in Python</h2>
+      <p>Pass headers as a dictionary to any requests call:</p>
+
+      <pre><span class="kw">import</span> requests
+
+headers = {
+    <span class="str">"Authorization"</span>: <span class="str">"Bearer my_token_here"</span>,
+    <span class="str">"Accept"</span>: <span class="str">"application/json"</span>,
+}
+
+response = requests.<span class="fn">get</span>(
+    <span class="str">"https://api.example.com/users"</span>,
+    headers=headers
+)</pre>
+
+      <h2>5.5 Reading Response Headers in Python</h2>
+      <p>Response headers come back as a dictionary-like object:</p>
+
+      <pre>response = requests.<span class="fn">get</span>(<span class="str">"https://api.example.com/data"</span>)
+
+<span class="cm"># Access a specific header</span>
+content_type = response.headers[<span class="str">"Content-Type"</span>]
+<span class="fn">print</span>(content_type)
+<span class="cm"># "application/json; charset=utf-8"</span>
+
+<span class="cm"># Check rate limit remaining (if the API sends it)</span>
+remaining = response.headers.<span class="fn">get</span>(<span class="str">"X-RateLimit-Remaining"</span>)
+<span class="fn">print</span>(remaining)
+<span class="cm"># "73"</span>
+
+<span class="cm"># Print all response headers</span>
+<span class="kw">for</span> key, value <span class="kw">in</span> response.headers.<span class="fn">items</span>():
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"{key}: {value}"</span>)</pre>
+
+      <div class="callout warning">
+        <div class="callout-title">⚠️ Header values are always strings</div>
+        <div class="callout-body"><p>Even if a header value looks like a number — like <code>X-RateLimit-Remaining: 73</code> — it comes back as the string <code>"73"</code>, not the integer <code>73</code>. Use <code>int()</code> to convert if you need to do arithmetic with it.</p></div>
+      </div>
+
+      <div class="exercise-block">
+        <div class="exercise-title">📝 Exercises</div>
+
+        <div class="question" data-correct="B">
+          <div class="question-text">Exercise 1 — Which header tells the server what format your request body is in?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> Accept</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> Content-Type</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> Authorization</li>
+          </ul>
+          <button class="reveal-btn" data-target="e5-1" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e5-1"><code>Content-Type</code> on a request tells the server what format you're sending. <code>Accept</code> tells the server what format you want back. <code>Authorization</code> carries credentials.</div>
+        </div>
+
+        <div class="question" data-correct="C">
+          <div class="question-text">Exercise 2 — How do you send custom headers with the requests library?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> requests.get(url, header="Authorization: Bearer token")</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> requests.get(url).set_header("Authorization", "Bearer token")</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> requests.get(url, headers={"Authorization": "Bearer token"})</li>
+          </ul>
+          <button class="reveal-btn" data-target="e5-2" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e5-2">Pass a dictionary to the <code>headers=</code> parameter. The key is the header name, the value is the header value. Multiple headers go in the same dictionary.</div>
+        </div>
+
+        <div class="question" data-correct="A">
+          <div class="question-text">Exercise 3 — You read <code>response.headers["X-RateLimit-Remaining"]</code> and get <code>"5"</code>. You want to check if it's less than 10. What must you do first?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> Convert it to an integer with int()</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> Nothing — "5" < 10 works fine in Python</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> Use float() instead</li>
+          </ul>
+          <button class="reveal-btn" data-target="e5-3" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e5-3">Header values are always strings. Comparing a string like <code>"5"</code> to an integer <code>10</code> in Python raises a TypeError. Use <code>int(response.headers["X-RateLimit-Remaining"]) &lt; 10</code>.</div>
+        </div>
+      </div>
+
+      <div class="callout checkpoint">
+        <div class="callout-title">🧠 Checkpoint</div>
+        <div class="callout-body">
+          <p>Write the Python code to make a GET request to <code>https://api.example.com/data</code> with two headers: an <code>Authorization</code> header set to <code>"Bearer abc123"</code>, and an <code>Accept</code> header set to <code>"application/json"</code>. Then print the response's <code>Content-Type</code> header.</p>
+          <textarea class="checkpoint-input" placeholder="import requests&#10;&#10;headers = {&#10;    ...&#10;}&#10;&#10;response = ...&#10;print(...)"></textarea>
+          <button class="reveal-btn" data-target="ch5-solution" data-show-label="Show solution" data-hide-label="Hide solution">Show solution</button>
+          <div class="reveal-content" id="ch5-solution">
+<pre><span class="kw">import</span> requests
+
+headers = {
+    <span class="str">"Authorization"</span>: <span class="str">"Bearer abc123"</span>,
+    <span class="str">"Accept"</span>: <span class="str">"application/json"</span>,
+}
+
+response = requests.<span class="fn">get</span>(<span class="str">"https://api.example.com/data"</span>, headers=headers)
+<span class="fn">print</span>(response.headers[<span class="str">"Content-Type"</span>])</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout concept">
+        <div class="callout-title">📌 What to remember</div>
+        <div class="callout-body">
+          <p>· Headers are metadata sent alongside requests and responses</p>
+          <p>· <strong>Authorization</strong> — your credentials</p>
+          <p>· <strong>Content-Type</strong> — format of the body being sent</p>
+          <p>· <strong>Accept</strong> — format you want back</p>
+          <p>· Send with <code>headers={...}</code> · Read with <code>response.headers["Name"]</code></p>
+          <p>· Header values are always strings</p>
+        </div>
+      </div>
+
+      <div class="chapter-nav">
+        <a class="nav-btn" href="chapter-04.html">
+          <span class="nav-btn-dir">← Previous</span>
+          <span class="nav-btn-title">Chapter 4: Status Codes</span>
+        </a>
+        <a class="nav-btn next" href="chapter-06.html">
+          <span class="nav-btn-dir">Next →</span>
+          <span class="nav-btn-title">Chapter 6: Installing Requests</span>
+        </a>
+      </div>
+    </div>
+  </main>
+</div>
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<script src="../js/book.js"></script>
+</body>
+</html>

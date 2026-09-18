@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 8 — Query Parameters | Practical HTTP with Python</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="book-title">Python · HTTP · APIs</div>
+      <div class="book-subtitle">Practical HTTP,<br>Requests &amp; APIs</div>
+    </div>
+    <div class="sidebar-nav">
+<div class="nav-part">Front Matter</div>
+<a class="nav-link" href="../index.html"><span class="nav-num">—</span> Introduction</a>
+<div class="nav-part">Part I — The Web</div>
+<a class="nav-link" href="chapter-01.html"><span class="nav-num">01</span> How the Web Works</a>
+<a class="nav-link" href="chapter-02.html"><span class="nav-num">02</span> URLs</a>
+<a class="nav-link" href="chapter-03.html"><span class="nav-num">03</span> HTTP Methods</a>
+<a class="nav-link" href="chapter-04.html"><span class="nav-num">04</span> Status Codes</a>
+<a class="nav-link" href="chapter-05.html"><span class="nav-num">05</span> Headers</a>
+<div class="nav-part">Part II — Requests</div>
+<a class="nav-link" href="chapter-06.html"><span class="nav-num">06</span> Installing Requests</a>
+<a class="nav-link" href="chapter-07.html"><span class="nav-num">07</span> GET Requests</a>
+<a class="nav-link active" href="chapter-08.html"><span class="nav-num">08</span> Query Parameters</a>
+<a class="nav-link" href="chapter-09.html"><span class="nav-num">09</span> POST Requests</a>
+<a class="nav-link" href="chapter-10.html"><span class="nav-num">10</span> Authentication</a>
+<a class="nav-link" href="chapter-11.html"><span class="nav-num">11</span> Error Handling</a>
+<div class="nav-part">Part III — APIs</div>
+<a class="nav-link" href="chapter-12.html"><span class="nav-num">12</span> What is a REST API?</a>
+<a class="nav-link" href="chapter-13.html"><span class="nav-num">13</span> Working with JSON</a>
+<a class="nav-link" href="chapter-14.html"><span class="nav-num">14</span> Real API: OpenWeather</a>
+<a class="nav-link" href="chapter-15.html"><span class="nav-num">15</span> Real API: GitHub</a>
+<div class="nav-part">Part IV — Projects</div>
+<a class="nav-link" href="project-01.html"><span class="nav-num">P1</span> Weather CLI</a>
+<a class="nav-link" href="project-02.html"><span class="nav-num">P2</span> GitHub Repo Finder</a>
+<a class="nav-link" href="project-03.html"><span class="nav-num">P3</span> News Aggregator</a>
+<div class="nav-part">Reference</div>
+<a class="nav-link" href="glossary.html"><span class="nav-num">—</span> Glossary</a>
+<a class="nav-link" href="cheatsheet.html"><span class="nav-num">—</span> Cheat Sheet</a>
+
+    </div>
+    <div class="sidebar-footer">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+      <span class="progress-label">Chapter 8 of 15</span>
+    </div>
+  </nav>
+  <main class="main">
+    <div class="chapter-content">
+      <div class="chapter-eyebrow">Part II — Python Requests · Chapter 8</div>
+      <h1 class="chapter-title">Query Parameters</h1>
+      <p class="chapter-lead">Query parameters let you filter, search, sort, and paginate data from an API — all without changing the URL path. This chapter explores every dimension of using them.</p>
+
+      <div class="objectives">
+        <div class="objectives-title">🎯 What you'll learn</div>
+        <ul>
+          <li>How query parameters work in depth</li>
+          <li>Multiple parameters, optional vs required</li>
+          <li>Filtering, sorting, and pagination patterns</li>
+          <li>How to inspect the final URL that was built</li>
+        </ul>
+      </div>
+
+      <h2>8.1 Recap — What Query Parameters Do</h2>
+      <p>Query parameters appear after the <code>?</code> in a URL. They don't identify <em>which</em> resource you want — they modify <em>how</em> you want it:</p>
+      <pre>/posts                 → all posts
+/posts?userId=1        → posts by user 1
+/posts?userId=1&_limit=5  → first 5 posts by user 1</pre>
+
+      <h2>8.2 Passing Multiple Parameters</h2>
+      <p>Simply add more keys to your params dictionary:</p>
+      <pre><span class="kw">import</span> requests
+
+params = {
+    <span class="str">"userId"</span>: <span class="num">1</span>,
+    <span class="str">"_limit"</span>: <span class="num">5</span>,
+    <span class="str">"_sort"</span>: <span class="str">"id"</span>,
+    <span class="str">"_order"</span>: <span class="str">"desc"</span>,
+}
+
+response = requests.<span class="fn">get</span>(
+    <span class="str">"https://jsonplaceholder.typicode.com/posts"</span>,
+    params=params
+)
+
+<span class="fn">print</span>(response.url)
+<span class="cm"># https://jsonplaceholder.typicode.com/posts?userId=1&_limit=5&_sort=id&_order=desc</span></pre>
+
+      <h2>8.3 Required vs Optional Parameters</h2>
+      <p>API documentation will tell you which parameters are required and which are optional. Required parameters must be included or you'll get a 400 or 422 error. Optional parameters have defaults.</p>
+      <p>Example from a hypothetical weather API:</p>
+      <pre><span class="cm"># Required</span>
+params = {
+    <span class="str">"q"</span>: <span class="str">"Accra"</span>,        <span class="cm"># REQUIRED: city name</span>
+    <span class="str">"appid"</span>: <span class="str">"YOUR_KEY"</span>,  <span class="cm"># REQUIRED: API key</span>
+    <span class="str">"units"</span>: <span class="str">"metric"</span>,    <span class="cm"># optional: default is Kelvin</span>
+    <span class="str">"lang"</span>: <span class="str">"en"</span>,         <span class="cm"># optional: default is "en"</span>
+}</pre>
+
+      <h2>8.4 Building Parameters Dynamically</h2>
+      <p>In real programs, parameters often come from user input or program logic:</p>
+      <pre><span class="kw">def</span> <span class="fn">search_posts</span>(user_id=<span class="kw">None</span>, limit=<span class="num">10</span>, sort=<span class="str">"id"</span>):
+    params = {
+        <span class="str">"_limit"</span>: limit,
+        <span class="str">"_sort"</span>: sort,
+    }
+    <span class="cm"># Only add userId if it was provided</span>
+    <span class="kw">if</span> user_id <span class="kw">is not None</span>:
+        params[<span class="str">"userId"</span>] = user_id
+
+    response = requests.<span class="fn">get</span>(
+        <span class="str">"https://jsonplaceholder.typicode.com/posts"</span>,
+        params=params
+    )
+    <span class="kw">return</span> response.<span class="fn">json</span>() <span class="kw">if</span> response.ok <span class="kw">else</span> []</pre>
+
+      <h2>8.5 Common API Parameter Patterns</h2>
+      <p>Most APIs follow recognisable patterns. Once you see one, you'll recognise them all:</p>
+      <pre><span class="cm"># Search / filter</span>
+params = {<span class="str">"q"</span>: <span class="str">"python"</span>, <span class="str">"type"</span>: <span class="str">"repo"</span>}
+
+<span class="cm"># Sorting</span>
+params = {<span class="str">"sort"</span>: <span class="str">"created_at"</span>, <span class="str">"order"</span>: <span class="str">"desc"</span>}
+
+<span class="cm"># Pagination</span>
+params = {<span class="str">"page"</span>: <span class="num">2</span>, <span class="str">"per_page"</span>: <span class="num">25</span>}
+
+<span class="cm"># Date range</span>
+params = {<span class="str">"from"</span>: <span class="str">"2024-01-01"</span>, <span class="str">"to"</span>: <span class="str">"2024-12-31"</span>}</pre>
+
+      <div class="exercise-block">
+        <div class="exercise-title">📝 Exercises</div>
+        <div class="question" data-correct="C">
+          <div class="question-text">Exercise 1 — What does <code>response.url</code> show you?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> The URL you passed to requests.get()</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> Only the base URL, not the parameters</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> The complete final URL including encoded parameters</li>
+          </ul>
+          <button class="reveal-btn" data-target="e8-1" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e8-1"><code>response.url</code> shows the full URL as it was actually sent — with all query parameters encoded and appended. This is useful for debugging what was actually requested.</div>
+        </div>
+        <div class="question" data-correct="B">
+          <div class="question-text">Exercise 2 — You call <code>requests.get(url, params={"city": "New York"})</code>. How does requests handle the space in "New York"?</div>
+          <ul class="options">
+            <li class="option" data-value="A"><span class="option-key">A</span> It raises an error because spaces aren't allowed</li>
+            <li class="option" data-value="B"><span class="option-key">B</span> It URL-encodes it automatically (New+York or New%20York)</li>
+            <li class="option" data-value="C"><span class="option-key">C</span> It keeps the space as-is</li>
+          </ul>
+          <button class="reveal-btn" data-target="e8-2" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+          <div class="reveal-content" id="e8-2">The library automatically URL-encodes values. "New York" becomes "New+York" or "New%20York" in the URL. This is one of the main reasons to use <code>params=</code> rather than manually building the query string.</div>
+        </div>
+      </div>
+
+      <div class="callout checkpoint">
+        <div class="callout-title">🧠 Mini-Project: Configurable Post Fetcher</div>
+        <div class="callout-body">
+          <p>Write a function <code>fetch_posts(user_id=None, limit=10)</code> that fetches posts from JSONPlaceholder. If <code>user_id</code> is given, filter by it. Print each post title. Call it a few ways to test it.</p>
+          <textarea class="checkpoint-input" style="min-height:120px;" placeholder="Write your solution…"></textarea>
+          <button class="reveal-btn" data-target="ch8-sol" data-show-label="Show solution" data-hide-label="Hide">Show solution</button>
+          <div class="reveal-content" id="ch8-sol"><pre><span class="kw">import</span> requests
+
+<span class="kw">def</span> <span class="fn">fetch_posts</span>(user_id=<span class="kw">None</span>, limit=<span class="num">10</span>):
+    params = {<span class="str">"_limit"</span>: limit}
+    <span class="kw">if</span> user_id <span class="kw">is not None</span>:
+        params[<span class="str">"userId"</span>] = user_id
+
+    response = requests.<span class="fn">get</span>(
+        <span class="str">"https://jsonplaceholder.typicode.com/posts"</span>,
+        params=params
+    )
+    posts = response.<span class="fn">json</span>()
+    <span class="kw">for</span> post <span class="kw">in</span> posts:
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"[{post['id']}] {post['title']}"</span>)
+
+<span class="fn">fetch_posts</span>()            <span class="cm"># first 10 posts</span>
+<span class="fn">fetch_posts</span>(user_id=<span class="num">2</span>)  <span class="cm"># user 2's posts (up to 10)</span>
+<span class="fn">fetch_posts</span>(limit=<span class="num">3</span>)    <span class="cm"># just 3 posts</span></pre></div>
+        </div>
+      </div>
+
+      <div class="chapter-nav">
+        <a class="nav-btn" href="chapter-07.html">
+          <span class="nav-btn-dir">← Previous</span>
+          <span class="nav-btn-title">Chapter 7: GET Requests</span>
+        </a>
+        <a class="nav-btn next" href="chapter-09.html">
+          <span class="nav-btn-dir">Next →</span>
+          <span class="nav-btn-title">Chapter 9: POST Requests</span>
+        </a>
+      </div>
+    </div>
+  </main>
+</div>
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<script src="../js/book.js"></script>
+</body>
+</html>

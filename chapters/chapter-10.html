@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 10 — Authentication | Practical HTTP with Python</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="book-title">Python · HTTP · APIs</div>
+      <div class="book-subtitle">Practical HTTP,<br>Requests &amp; APIs</div>
+    </div>
+    <div class="sidebar-nav"><div class="nav-part">Front Matter</div>
+<a class="nav-link" href="../index.html"><span class="nav-num">—</span> Introduction</a>
+<div class="nav-part">Part I — The Web</div>
+<a class="nav-link" href="chapter-01.html"><span class="nav-num">01</span> How the Web Works</a>
+<a class="nav-link" href="chapter-02.html"><span class="nav-num">02</span> URLs</a>
+<a class="nav-link" href="chapter-03.html"><span class="nav-num">03</span> HTTP Methods</a>
+<a class="nav-link" href="chapter-04.html"><span class="nav-num">04</span> Status Codes</a>
+<a class="nav-link" href="chapter-05.html"><span class="nav-num">05</span> Headers</a>
+<div class="nav-part">Part II — Requests</div>
+<a class="nav-link" href="chapter-06.html"><span class="nav-num">06</span> Installing Requests</a>
+<a class="nav-link" href="chapter-07.html"><span class="nav-num">07</span> GET Requests</a>
+<a class="nav-link" href="chapter-08.html"><span class="nav-num">08</span> Query Parameters</a>
+<a class="nav-link" href="chapter-09.html"><span class="nav-num">09</span> POST Requests</a>
+<a class="nav-link active" href="chapter-10.html"><span class="nav-num">10</span> Authentication</a>
+<a class="nav-link" href="chapter-11.html"><span class="nav-num">11</span> Error Handling</a>
+<div class="nav-part">Part III — APIs</div>
+<a class="nav-link" href="chapter-12.html"><span class="nav-num">12</span> What is a REST API?</a>
+<a class="nav-link" href="chapter-13.html"><span class="nav-num">13</span> Working with JSON</a>
+<a class="nav-link" href="chapter-14.html"><span class="nav-num">14</span> Real API: OpenWeather</a>
+<a class="nav-link" href="chapter-15.html"><span class="nav-num">15</span> Real API: GitHub</a>
+<div class="nav-part">Part IV — Projects</div>
+<a class="nav-link" href="project-01.html"><span class="nav-num">P1</span> Weather CLI</a>
+<a class="nav-link" href="project-02.html"><span class="nav-num">P2</span> GitHub Repo Finder</a>
+<a class="nav-link" href="project-03.html"><span class="nav-num">P3</span> News Aggregator</a>
+<div class="nav-part">Reference</div>
+<a class="nav-link" href="glossary.html"><span class="nav-num">—</span> Glossary</a>
+<a class="nav-link" href="cheatsheet.html"><span class="nav-num">—</span> Cheat Sheet</a>
+</div>
+    <div class="sidebar-footer">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+      <span class="progress-label">Chapter 10 of 15</span>
+    </div>
+  </nav>
+  <main class="main"><div class="chapter-content">
+    <div class="chapter-eyebrow">Part II — Python Requests · Chapter 10</div>
+    <h1 class="chapter-title">Authentication</h1>
+    <p class="chapter-lead">Most real APIs require authentication. This chapter covers the common patterns and — crucially — how to keep your secrets safe.</p>
+    
+<div class="objectives"><div class="objectives-title">🎯 What you'll learn</div><ul>
+<li>Why APIs require authentication</li>
+<li>The three most common auth patterns: API key, Bearer token, Basic auth</li>
+<li>How to store secrets safely using environment variables</li>
+<li>How to send credentials in headers</li>
+</ul></div>
+
+<h2>10.1 Why Authentication Exists</h2>
+<p>Without authentication, anyone could call your API and:</p>
+<ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:4px;margin-bottom:18px;font-family:var(--font-sans);font-size:15px;">
+<li style="padding-left:16px;color:var(--text-muted);">· Read data they shouldn't see</li>
+<li style="padding-left:16px;color:var(--text-muted);">· Create, update, or delete records</li>
+<li style="padding-left:16px;color:var(--text-muted);">· Hammer the server with unlimited requests</li>
+</ul>
+<p>Authentication solves this by requiring every caller to prove who they are before the server responds.</p>
+
+<h2>10.2 API Keys</h2>
+<p>The simplest pattern. You sign up for the API, it gives you a unique key, and you send that key with every request.</p>
+<p>API keys are most commonly sent in a header:</p>
+<pre><span class="kw">import</span> requests
+
+headers = {
+    <span class="str">"Authorization"</span>: <span class="str">"Bearer YOUR_API_KEY"</span>
+}
+
+response = requests.<span class="fn">get</span>(
+    <span class="str">"https://api.example.com/data"</span>,
+    headers=headers
+)</pre>
+<p>Some older APIs send the key as a query parameter instead:</p>
+<pre>params = {<span class="str">"api_key"</span>: <span class="str">"YOUR_KEY"</span>}
+<span class="cm"># → https://api.example.com/data?api_key=YOUR_KEY</span></pre>
+<div class="callout warning">
+<div class="callout-title">⚠️ Don't put API keys in query strings if you can avoid it</div>
+<div class="callout-body"><p>Query string parameters appear in server logs and browser history. Headers are safer. Use a query parameter only when the API requires it.</p></div>
+</div>
+
+<h2>10.3 Bearer Tokens</h2>
+<p>Bearer tokens are the most common modern pattern. You authenticate once (login) and receive a token. Then you send that token with subsequent requests:</p>
+<pre>headers = {
+    <span class="str">"Authorization"</span>: <span class="str">f"Bearer {token}"</span>
+}
+response = requests.<span class="fn">get</span>(url, headers=headers)</pre>
+<p>The word "Bearer" is part of the header format — it means "whoever holds (bears) this token is authorized."</p>
+
+<h2>10.4 Basic Authentication</h2>
+<p>Some older APIs use HTTP Basic Auth — a username and password encoded in the request. The requests library handles this cleanly:</p>
+<pre>response = requests.<span class="fn">get</span>(
+    <span class="str">"https://api.example.com/private"</span>,
+    auth=(<span class="str">"my_username"</span>, <span class="str">"my_password"</span>)
+)</pre>
+
+<h2>10.5 🔐 Never Hardcode Secrets</h2>
+<p>This is critically important. Never write your API key directly in your code:</p>
+<pre><span class="cm"># ❌ NEVER DO THIS</span>
+api_key = <span class="str">"sk-abc123secretkey456def"</span>  <span class="cm"># WRONG</span></pre>
+<p>If you push this code to GitHub, your key is exposed permanently — even if you delete it later, it's in the git history.</p>
+<p>Instead, use environment variables:</p>
+<pre><span class="kw">import</span> os
+<span class="kw">import</span> requests
+
+api_key = os.environ.<span class="fn">get</span>(<span class="str">"MY_API_KEY"</span>)
+<span class="kw">if not</span> api_key:
+    <span class="kw">raise</span> <span class="cls">ValueError</span>(<span class="str">"MY_API_KEY not set"</span>)
+
+headers = {<span class="str">"Authorization"</span>: <span class="fn">f</span><span class="str">"Bearer {api_key}"</span>}
+response = requests.<span class="fn">get</span>(url, headers=headers)</pre>
+
+<h2>10.6 Setting Environment Variables</h2>
+<p>In your terminal (lasts for the session):</p>
+<pre>export MY_API_KEY="your-actual-key-here"   # Mac/Linux
+set MY_API_KEY=your-actual-key-here        # Windows</pre>
+<p>Or create a <code>.env</code> file and use the <code>python-dotenv</code> package:</p>
+<pre><span class="cm"># .env file (never commit this to git!)</span>
+MY_API_KEY=your-actual-key-here</pre>
+<pre><span class="cm"># .gitignore — add this line</span>
+.env</pre>
+<pre><span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
+<span class="fn">load_dotenv</span>()
+api_key = os.environ[<span class="str">"MY_API_KEY"</span>]</pre>
+
+<div class="exercise-block">
+<div class="exercise-title">📝 Exercises</div>
+<div class="question" data-correct="C">
+<div class="question-text">Exercise 1 — What does "Bearer" mean in "Authorization: Bearer TOKEN"?</div>
+<ul class="options">
+<li class="option" data-value="A"><span class="option-key">A</span> It's the username</li>
+<li class="option" data-value="B"><span class="option-key">B</span> It's a random word with no meaning</li>
+<li class="option" data-value="C"><span class="option-key">C</span> It's an auth scheme — whoever holds this token is authorized</li>
+</ul>
+<button class="reveal-btn" data-target="e10-1" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+<div class="reveal-content" id="e10-1">"Bearer" is the authentication scheme type. It means "the bearer (holder) of this token has permission to access the resource." It's part of the HTTP Authorization header format.</div>
+</div>
+<div class="question" data-correct="B">
+<div class="question-text">Exercise 2 — Why should you never hardcode an API key in your Python file?</div>
+<ul class="options">
+<li class="option" data-value="A"><span class="option-key">A</span> It makes the code run slower</li>
+<li class="option" data-value="B"><span class="option-key">B</span> If the code is shared or pushed to git, the key is exposed</li>
+<li class="option" data-value="C"><span class="option-key">C</span> Python can't read string literals that look like keys</li>
+</ul>
+<button class="reveal-btn" data-target="e10-2" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+<div class="reveal-content" id="e10-2">API keys are like passwords. If your code is on GitHub (even a private repo that later becomes public), or shared with anyone, the key is compromised. Use environment variables so the key lives outside the code.</div>
+</div>
+</div>
+
+<div class="callout checkpoint">
+<div class="callout-title">🧠 Checkpoint</div>
+<div class="callout-body">
+<p>Write a function <code>make_authenticated_request(url)</code> that reads an API key from the environment variable <code>API_KEY</code> and sends it as a Bearer token header. It should return the JSON response if successful, or raise an error if the key isn't set.</p>
+<textarea class="checkpoint-input" placeholder="Write your solution…"></textarea>
+<button class="reveal-btn" data-target="ch10-sol" data-show-label="Show solution" data-hide-label="Hide">Show solution</button>
+<div class="reveal-content" id="ch10-sol"><pre><span class="kw">import</span> os
+<span class="kw">import</span> requests
+
+<span class="kw">def</span> <span class="fn">make_authenticated_request</span>(url):
+    api_key = os.environ.<span class="fn">get</span>(<span class="str">"API_KEY"</span>)
+    <span class="kw">if not</span> api_key:
+        <span class="kw">raise</span> <span class="cls">ValueError</span>(<span class="str">"API_KEY environment variable not set"</span>)
+
+    headers = {<span class="str">"Authorization"</span>: <span class="fn">f</span><span class="str">"Bearer {api_key}"</span>}
+    response = requests.<span class="fn">get</span>(url, headers=headers)
+
+    <span class="kw">if</span> response.ok:
+        <span class="kw">return</span> response.<span class="fn">json</span>()
+    <span class="kw">else</span>:
+        <span class="kw">raise</span> <span class="cls">Exception</span>(<span class="fn">f</span><span class="str">"Request failed: {response.status_code}"</span>)</pre></div>
+</div>
+</div>
+
+    <div class="chapter-nav">
+      <a class="nav-btn" href="chapter-09.html"><span class="nav-btn-dir">← Previous</span><span class="nav-btn-title">Chapter 9: POST Requests</span></a>
+      <a class="nav-btn next" href="chapter-11.html"><span class="nav-btn-dir">Next →</span><span class="nav-btn-title">Chapter 11: Error Handling</span></a>
+    </div>
+  </div></main>
+</div>
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<script src="../js/book.js"></script>
+</body></html>

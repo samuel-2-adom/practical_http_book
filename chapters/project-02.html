@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project 2: GitHub Repo Finder | Practical HTTP with Python</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="book-title">Python · HTTP · APIs</div>
+      <div class="book-subtitle">Practical HTTP,<br>Requests &amp; APIs</div>
+    </div>
+    <div class="sidebar-nav"><div class="nav-part">Front Matter</div>
+<a class="nav-link" href="../index.html"><span class="nav-num">—</span> Introduction</a>
+<div class="nav-part">Part I — The Web</div>
+<a class="nav-link" href="chapter-01.html"><span class="nav-num">01</span> How the Web Works</a>
+<a class="nav-link" href="chapter-02.html"><span class="nav-num">02</span> URLs</a>
+<a class="nav-link" href="chapter-03.html"><span class="nav-num">03</span> HTTP Methods</a>
+<a class="nav-link" href="chapter-04.html"><span class="nav-num">04</span> Status Codes</a>
+<a class="nav-link" href="chapter-05.html"><span class="nav-num">05</span> Headers</a>
+<div class="nav-part">Part II — Requests</div>
+<a class="nav-link" href="chapter-06.html"><span class="nav-num">06</span> Installing Requests</a>
+<a class="nav-link" href="chapter-07.html"><span class="nav-num">07</span> GET Requests</a>
+<a class="nav-link" href="chapter-08.html"><span class="nav-num">08</span> Query Parameters</a>
+<a class="nav-link" href="chapter-09.html"><span class="nav-num">09</span> POST Requests</a>
+<a class="nav-link" href="chapter-10.html"><span class="nav-num">10</span> Authentication</a>
+<a class="nav-link" href="chapter-11.html"><span class="nav-num">11</span> Error Handling</a>
+<div class="nav-part">Part III — APIs</div>
+<a class="nav-link" href="chapter-12.html"><span class="nav-num">12</span> What is a REST API?</a>
+<a class="nav-link" href="chapter-13.html"><span class="nav-num">13</span> Working with JSON</a>
+<a class="nav-link" href="chapter-14.html"><span class="nav-num">14</span> Real API: OpenWeather</a>
+<a class="nav-link" href="chapter-15.html"><span class="nav-num">15</span> Real API: GitHub</a>
+<div class="nav-part">Part IV — Projects</div>
+<a class="nav-link" href="project-01.html"><span class="nav-num">P1</span> Weather CLI</a>
+<a class="nav-link active" href="project-02.html"><span class="nav-num">P2</span> GitHub Repo Finder</a>
+<a class="nav-link" href="project-03.html"><span class="nav-num">P3</span> News Aggregator</a>
+<div class="nav-part">Reference</div>
+<a class="nav-link" href="glossary.html"><span class="nav-num">—</span> Glossary</a>
+<a class="nav-link" href="cheatsheet.html"><span class="nav-num">—</span> Cheat Sheet</a>
+</div>
+    <div class="sidebar-footer">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+      <span class="progress-label">Project 2 of 3</span>
+    </div>
+  </nav>
+  <main class="main"><div class="chapter-content">
+    <div class="chapter-eyebrow">Part IV — Projects · Project 2</div>
+    <h1 class="chapter-title">Project 2: GitHub Repo Finder</h1>
+    <p class="chapter-lead">Search GitHub repositories by keyword and present the top results with star counts, descriptions, and links. Save results to a file.</p>
+    
+<div class="callout concept">
+<div class="callout-title">🚀 Project overview</div>
+<div class="callout-body">
+<p>Build a GitHub repository search tool. The user enters a search query; your program fetches the top results sorted by stars and presents them cleanly. Optionally save results to a CSV or JSON file.</p>
+<p><strong>Skills used:</strong> Authentication · GET · search params · pagination · JSON · file I/O</p>
+</div>
+</div>
+
+<h2>What You'll Build</h2>
+<pre>$ python repo_finder.py
+Search GitHub repos: python web scraping
+Sort by (stars/forks/updated) [stars]: stars
+Max results [10]: 5
+
+Top 5 results for "python web scraping"
+════════════════════════════════════════
+1. scrapy/scrapy
+   ⭐ 51,234  🍴 10,891
+   An open source and collaborative framework for extracting data.
+   https://github.com/scrapy/scrapy
+
+2. ...
+
+Save results to file? (y/n): y
+Saved to results.json</pre>
+
+<h2>Complete Code</h2>
+<pre><span class="kw">import</span> os, json, requests
+
+token = os.environ.<span class="fn">get</span>(<span class="str">"GITHUB_TOKEN"</span>)
+headers = {<span class="str">"Authorization"</span>: <span class="fn">f</span><span class="str">"Bearer {token}"</span>} <span class="kw">if</span> token <span class="kw">else</span> {}
+BASE = <span class="str">"https://api.github.com"</span>
+
+<span class="kw">def</span> <span class="fn">search_repos</span>(query, sort=<span class="str">"stars"</span>, limit=<span class="num">10</span>):
+    per_page = <span class="fn">min</span>(limit, <span class="num">30</span>)
+    <span class="kw">try</span>:
+        response = requests.<span class="fn">get</span>(
+            <span class="fn">f</span><span class="str">"{BASE}/search/repositories"</span>,
+            headers=headers,
+            params={<span class="str">"q"</span>: query, <span class="str">"sort"</span>: sort,
+                    <span class="str">"order"</span>: <span class="str">"desc"</span>, <span class="str">"per_page"</span>: per_page},
+            timeout=<span class="num">10</span>
+        )
+        response.<span class="fn">raise_for_status</span>()
+    <span class="kw">except</span> requests.exceptions.<span class="cls">RequestException</span> <span class="kw">as</span> e:
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Error: {e}"</span>)
+        <span class="kw">return</span> []
+
+    <span class="kw">return</span> response.<span class="fn">json</span>().<span class="fn">get</span>(<span class="str">"items"</span>, [])[:limit]
+
+<span class="kw">def</span> <span class="fn">display_repos</span>(repos, query):
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"\nTop {len(repos)} results for \"{query}\""</span>)
+    <span class="fn">print</span>(<span class="str">"═" * 42</span>)
+    <span class="kw">for</span> i, repo <span class="kw">in</span> <span class="fn">enumerate</span>(repos, <span class="num">1</span>):
+        desc = repo.<span class="fn">get</span>(<span class="str">"description"</span>) <span class="kw">or</span> <span class="str">"No description"</span>
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"\n{i}. {repo['full_name']}"</span>)
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"   ⭐ {repo['stargazers_count']:,}  🍴 {repo['forks_count']:,}"</span>)
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"   {desc}"</span>)
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"   {repo['html_url']}"</span>)
+
+<span class="kw">def</span> <span class="fn">save_results</span>(repos, filename=<span class="str">"results.json"</span>):
+    output = [{
+        <span class="str">"name"</span>: r[<span class="str">"full_name"</span>],
+        <span class="str">"stars"</span>: r[<span class="str">"stargazers_count"</span>],
+        <span class="str">"description"</span>: r.<span class="fn">get</span>(<span class="str">"description"</span>),
+        <span class="str">"url"</span>: r[<span class="str">"html_url"</span>],
+    } <span class="kw">for</span> r <span class="kw">in</span> repos]
+    <span class="kw">with</span> <span class="fn">open</span>(filename, <span class="str">"w"</span>) <span class="kw">as</span> f:
+        json.<span class="fn">dump</span>(output, f, indent=<span class="num">2</span>)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Saved to {filename}"</span>)
+
+<span class="kw">def</span> <span class="fn">main</span>():
+    query = <span class="fn">input</span>(<span class="str">"Search GitHub repos: "</span>).strip()
+    sort = <span class="fn">input</span>(<span class="str">"Sort by (stars/forks/updated) [stars]: "</span>).strip() <span class="kw">or</span> <span class="str">"stars"</span>
+    limit = <span class="fn">int</span>(<span class="fn">input</span>(<span class="str">"Max results [10]: "</span>).strip() <span class="kw">or</span> <span class="num">10</span>)
+
+    repos = <span class="fn">search_repos</span>(query, sort, limit)
+    <span class="kw">if not</span> repos:
+        <span class="fn">print</span>(<span class="str">"No results."</span>); <span class="kw">return</span>
+
+    <span class="fn">display_repos</span>(repos, query)
+
+    <span class="kw">if</span> <span class="fn">input</span>(<span class="str">"\nSave results to file? (y/n): "</span>).<span class="fn">lower</span>() == <span class="str">"y"</span>:
+        <span class="fn">save_results</span>(repos)
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    <span class="fn">main</span>()</pre>
+
+<h2>Extensions to Try</h2>
+<ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:6px;font-family:var(--font-sans);font-size:15px;">
+<li style="padding-left:16px;color:var(--text-muted);">· Add a language filter (<code>q="python api language:python"</code>)</li>
+<li style="padding-left:16px;color:var(--text-muted);">· Export as CSV using Python's <code>csv</code> module</li>
+<li style="padding-left:16px;color:var(--text-muted);">· Implement pagination to fetch more than 30 results</li>
+<li style="padding-left:16px;color:var(--text-muted);">· Add filtering: only repos updated in the last year</li>
+</ul>
+
+    <div class="chapter-nav">
+      <a class="nav-btn" href="project-01.html"><span class="nav-btn-dir">← Previous</span><span class="nav-btn-title">Project 1: Weather CLI</span></a>
+      <a class="nav-btn next" href="project-03.html"><span class="nav-btn-dir">Next →</span><span class="nav-btn-title">Project 3: News Aggregator</span></a>
+    </div>
+  </div></main>
+</div>
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<script src="../js/book.js"></script>
+</body></html>

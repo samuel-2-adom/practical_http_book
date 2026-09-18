@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 13 — Working with JSON | Practical HTTP with Python</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="book-title">Python · HTTP · APIs</div>
+      <div class="book-subtitle">Practical HTTP,<br>Requests &amp; APIs</div>
+    </div>
+    <div class="sidebar-nav"><div class="nav-part">Front Matter</div>
+<a class="nav-link" href="../index.html"><span class="nav-num">—</span> Introduction</a>
+<div class="nav-part">Part I — The Web</div>
+<a class="nav-link" href="chapter-01.html"><span class="nav-num">01</span> How the Web Works</a>
+<a class="nav-link" href="chapter-02.html"><span class="nav-num">02</span> URLs</a>
+<a class="nav-link" href="chapter-03.html"><span class="nav-num">03</span> HTTP Methods</a>
+<a class="nav-link" href="chapter-04.html"><span class="nav-num">04</span> Status Codes</a>
+<a class="nav-link" href="chapter-05.html"><span class="nav-num">05</span> Headers</a>
+<div class="nav-part">Part II — Requests</div>
+<a class="nav-link" href="chapter-06.html"><span class="nav-num">06</span> Installing Requests</a>
+<a class="nav-link" href="chapter-07.html"><span class="nav-num">07</span> GET Requests</a>
+<a class="nav-link" href="chapter-08.html"><span class="nav-num">08</span> Query Parameters</a>
+<a class="nav-link" href="chapter-09.html"><span class="nav-num">09</span> POST Requests</a>
+<a class="nav-link" href="chapter-10.html"><span class="nav-num">10</span> Authentication</a>
+<a class="nav-link" href="chapter-11.html"><span class="nav-num">11</span> Error Handling</a>
+<div class="nav-part">Part III — APIs</div>
+<a class="nav-link" href="chapter-12.html"><span class="nav-num">12</span> What is a REST API?</a>
+<a class="nav-link active" href="chapter-13.html"><span class="nav-num">13</span> Working with JSON</a>
+<a class="nav-link" href="chapter-14.html"><span class="nav-num">14</span> Real API: OpenWeather</a>
+<a class="nav-link" href="chapter-15.html"><span class="nav-num">15</span> Real API: GitHub</a>
+<div class="nav-part">Part IV — Projects</div>
+<a class="nav-link" href="project-01.html"><span class="nav-num">P1</span> Weather CLI</a>
+<a class="nav-link" href="project-02.html"><span class="nav-num">P2</span> GitHub Repo Finder</a>
+<a class="nav-link" href="project-03.html"><span class="nav-num">P3</span> News Aggregator</a>
+<div class="nav-part">Reference</div>
+<a class="nav-link" href="glossary.html"><span class="nav-num">—</span> Glossary</a>
+<a class="nav-link" href="cheatsheet.html"><span class="nav-num">—</span> Cheat Sheet</a>
+</div>
+    <div class="sidebar-footer">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+      <span class="progress-label">Chapter 13 of 15</span>
+    </div>
+  </nav>
+  <main class="main"><div class="chapter-content">
+    <div class="chapter-eyebrow">Part III — APIs · Chapter 13</div>
+    <h1 class="chapter-title">Working with JSON</h1>
+    <p class="chapter-lead">JSON is the language APIs speak. You already know Python dicts and lists — JSON is just their text representation. This chapter makes that mapping completely explicit.</p>
+    
+<div class="objectives"><div class="objectives-title">🎯 What you'll learn</div><ul>
+<li>What JSON is and why APIs use it</li>
+<li>How JSON maps to Python types</li>
+<li>Navigating nested JSON structures</li>
+<li>Encoding Python data as JSON</li>
+</ul></div>
+
+<h2>13.1 What Is JSON?</h2>
+<p>JSON — JavaScript Object Notation — is the data format almost every modern API uses. It's a text format for representing structured data, and it looks a lot like Python dictionaries and lists:</p>
+<pre>{
+    <span class="str">"name"</span>: <span class="str">"Samuel"</span>,
+    <span class="str">"age"</span>: <span class="num">25</span>,
+    <span class="str">"active"</span>: <span class="kw">true</span>,
+    <span class="str">"score"</span>: <span class="kw">null</span>,
+    <span class="str">"languages"</span>: [<span class="str">"Python"</span>, <span class="str">"JavaScript"</span>],
+    <span class="str">"address"</span>: {
+        <span class="str">"city"</span>: <span class="str">"Accra"</span>,
+        <span class="str">"country"</span>: <span class="str">"Ghana"</span>
+    }
+}</pre>
+
+<h2>13.2 JSON → Python Type Mapping</h2>
+<div class="diagram">JSON type        Python type     Example
+──────────────────────────────────────────────
+object           dict            {"key": "val"}
+array            list            [1, 2, 3]
+string           str             "hello"
+number (int)     int             42
+number (float)   float           3.14
+true             True            true
+false            False           false
+null             None            null</div>
+<p>When you call <code>response.json()</code>, requests parses the JSON and returns native Python types. You don't need to do anything extra.</p>
+
+<h2>13.3 Navigating JSON Data</h2>
+<pre>data = response.<span class="fn">json</span>()
+
+<span class="cm"># Top-level keys</span>
+<span class="fn">print</span>(data[<span class="str">"name"</span>])           <span class="cm"># "Samuel"</span>
+<span class="fn">print</span>(data[<span class="str">"age"</span>])            <span class="cm"># 25</span>
+
+<span class="cm"># List access</span>
+<span class="fn">print</span>(data[<span class="str">"languages"</span>][<span class="num">0</span>])  <span class="cm"># "Python"</span>
+
+<span class="cm"># Nested dict</span>
+<span class="fn">print</span>(data[<span class="str">"address"</span>][<span class="str">"city"</span>])  <span class="cm"># "Accra"</span>
+
+<span class="cm"># Safe access with .get() — returns None instead of KeyError</span>
+<span class="fn">print</span>(data.<span class="fn">get</span>(<span class="str">"phone"</span>))      <span class="cm"># None (key doesn't exist)</span>
+<span class="fn">print</span>(data.<span class="fn">get</span>(<span class="str">"phone"</span>, <span class="str">"N/A"</span>))  <span class="cm"># "N/A" (default)</span></pre>
+
+<h2>13.4 Looping Over JSON Arrays</h2>
+<pre><span class="cm"># API returns a list of users</span>
+users = response.<span class="fn">json</span>()  <span class="cm"># list of dicts</span>
+
+<span class="kw">for</span> user <span class="kw">in</span> users:
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"{user['id']}: {user['name']} ({user['email']})"</span>)
+
+<span class="cm"># Filter in Python</span>
+active_users = [u <span class="kw">for</span> u <span class="kw">in</span> users <span class="kw">if</span> u.<span class="fn">get</span>(<span class="str">"active"</span>)]</pre>
+
+<h2>13.5 Encoding Python as JSON</h2>
+<p>Use the <code>json</code> module to convert Python to a JSON string:</p>
+<pre><span class="kw">import</span> json
+
+data = {<span class="str">"name"</span>: <span class="str">"Samuel"</span>, <span class="str">"score"</span>: <span class="num">98</span>}
+
+<span class="cm"># Python → JSON string</span>
+json_str = json.<span class="fn">dumps</span>(data)
+<span class="fn">print</span>(json_str)   <span class="cm"># '{"name": "Samuel", "score": 98}'</span>
+
+<span class="cm"># Pretty-printed</span>
+<span class="fn">print</span>(json.<span class="fn">dumps</span>(data, indent=<span class="num">2</span>))</pre>
+<div class="callout tip">
+<div class="callout-title">💡 You rarely need json.dumps() with requests</div>
+<div class="callout-body"><p>When you use <code>requests.post(url, json=data)</code>, the library calls <code>json.dumps()</code> for you. You only need the <code>json</code> module directly when saving to files or doing other non-requests work.</p></div>
+</div>
+
+<h2>13.6 Handling Missing Keys Safely</h2>
+<pre><span class="cm"># Risky — KeyError if "phone" doesn't exist</span>
+phone = user[<span class="str">"phone"</span>]
+
+<span class="cm"># Safe — returns None if missing</span>
+phone = user.<span class="fn">get</span>(<span class="str">"phone"</span>)
+
+<span class="cm"># Safe with default</span>
+phone = user.<span class="fn">get</span>(<span class="str">"phone"</span>, <span class="str">"not provided"</span>)
+
+<span class="cm"># Nested safe access</span>
+city = user.<span class="fn">get</span>(<span class="str">"address"</span>, {}).<span class="fn">get</span>(<span class="str">"city"</span>, <span class="str">"unknown"</span>)</pre>
+
+<div class="exercise-block">
+<div class="exercise-title">📝 Exercises</div>
+<div class="question" data-correct="A">
+<div class="question-text">Exercise 1 — A JSON response has <code>{"results": [{"id": 1}, {"id": 2}]}</code>. How do you get the first id?</div>
+<ul class="options">
+<li class="option" data-value="A"><span class="option-key">A</span> data["results"][0]["id"]</li>
+<li class="option" data-value="B"><span class="option-key">B</span> data[0]["results"]["id"]</li>
+<li class="option" data-value="C"><span class="option-key">C</span> data.results[0].id</li>
+</ul>
+<button class="reveal-btn" data-target="e13-1" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+<div class="reveal-content" id="e13-1"><code>data["results"]</code> gives you the list. <code>[0]</code> gives the first item (a dict). <code>["id"]</code> gives the id. Python uses square-bracket notation for both dict keys and list indices — never dot notation like JavaScript.</div>
+</div>
+<div class="question" data-correct="C">
+<div class="question-text">Exercise 2 — What Python type does a JSON <code>null</code> become?</div>
+<ul class="options">
+<li class="option" data-value="A"><span class="option-key">A</span> 0</li>
+<li class="option" data-value="B"><span class="option-key">B</span> False</li>
+<li class="option" data-value="C"><span class="option-key">C</span> None</li>
+</ul>
+<button class="reveal-btn" data-target="e13-2" data-show-label="Show explanation" data-hide-label="Hide">Show explanation</button>
+<div class="reveal-content" id="e13-2">JSON <code>null</code> → Python <code>None</code>. JSON <code>true</code>/<code>false</code> → Python <code>True</code>/<code>False</code>. These are the three non-obvious mappings to remember.</div>
+</div>
+</div>
+
+<div class="callout checkpoint">
+<div class="callout-title">🧠 Mini-Project: JSON Explorer</div>
+<div class="callout-body">
+<p>Fetch <code>https://jsonplaceholder.typicode.com/users</code> and for each user print: their name, email, and the name of their company (it's nested under <code>"company"</code> → <code>"name"</code>). Use <code>.get()</code> for safety.</p>
+<textarea class="checkpoint-input" style="min-height:120px;" placeholder="Write your solution…"></textarea>
+<button class="reveal-btn" data-target="ch13-sol" data-show-label="Show solution" data-hide-label="Hide">Show solution</button>
+<div class="reveal-content" id="ch13-sol"><pre><span class="kw">import</span> requests
+
+response = requests.<span class="fn">get</span>(<span class="str">"https://jsonplaceholder.typicode.com/users"</span>)
+users = response.<span class="fn">json</span>()
+
+<span class="kw">for</span> user <span class="kw">in</span> users:
+    name    = user.<span class="fn">get</span>(<span class="str">"name"</span>, <span class="str">"?"</span>)
+    email   = user.<span class="fn">get</span>(<span class="str">"email"</span>, <span class="str">"?"</span>)
+    company = user.<span class="fn">get</span>(<span class="str">"company"</span>, {}).<span class="fn">get</span>(<span class="str">"name"</span>, <span class="str">"?"</span>)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"{name} | {email} | {company}"</span>)</pre></div>
+</div>
+</div>
+
+    <div class="chapter-nav">
+      <a class="nav-btn" href="chapter-12.html"><span class="nav-btn-dir">← Previous</span><span class="nav-btn-title">Chapter 12: What is a REST API?</span></a>
+      <a class="nav-btn next" href="chapter-14.html"><span class="nav-btn-dir">Next →</span><span class="nav-btn-title">Chapter 14: Real API: OpenWeather</span></a>
+    </div>
+  </div></main>
+</div>
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<script src="../js/book.js"></script>
+</body></html>

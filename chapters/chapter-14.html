@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 14 — Real API: OpenWeather | Practical HTTP with Python</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="book-title">Python · HTTP · APIs</div>
+      <div class="book-subtitle">Practical HTTP,<br>Requests &amp; APIs</div>
+    </div>
+    <div class="sidebar-nav"><div class="nav-part">Front Matter</div>
+<a class="nav-link" href="../index.html"><span class="nav-num">—</span> Introduction</a>
+<div class="nav-part">Part I — The Web</div>
+<a class="nav-link" href="chapter-01.html"><span class="nav-num">01</span> How the Web Works</a>
+<a class="nav-link" href="chapter-02.html"><span class="nav-num">02</span> URLs</a>
+<a class="nav-link" href="chapter-03.html"><span class="nav-num">03</span> HTTP Methods</a>
+<a class="nav-link" href="chapter-04.html"><span class="nav-num">04</span> Status Codes</a>
+<a class="nav-link" href="chapter-05.html"><span class="nav-num">05</span> Headers</a>
+<div class="nav-part">Part II — Requests</div>
+<a class="nav-link" href="chapter-06.html"><span class="nav-num">06</span> Installing Requests</a>
+<a class="nav-link" href="chapter-07.html"><span class="nav-num">07</span> GET Requests</a>
+<a class="nav-link" href="chapter-08.html"><span class="nav-num">08</span> Query Parameters</a>
+<a class="nav-link" href="chapter-09.html"><span class="nav-num">09</span> POST Requests</a>
+<a class="nav-link" href="chapter-10.html"><span class="nav-num">10</span> Authentication</a>
+<a class="nav-link" href="chapter-11.html"><span class="nav-num">11</span> Error Handling</a>
+<div class="nav-part">Part III — APIs</div>
+<a class="nav-link" href="chapter-12.html"><span class="nav-num">12</span> What is a REST API?</a>
+<a class="nav-link" href="chapter-13.html"><span class="nav-num">13</span> Working with JSON</a>
+<a class="nav-link active" href="chapter-14.html"><span class="nav-num">14</span> Real API: OpenWeather</a>
+<a class="nav-link" href="chapter-15.html"><span class="nav-num">15</span> Real API: GitHub</a>
+<div class="nav-part">Part IV — Projects</div>
+<a class="nav-link" href="project-01.html"><span class="nav-num">P1</span> Weather CLI</a>
+<a class="nav-link" href="project-02.html"><span class="nav-num">P2</span> GitHub Repo Finder</a>
+<a class="nav-link" href="project-03.html"><span class="nav-num">P3</span> News Aggregator</a>
+<div class="nav-part">Reference</div>
+<a class="nav-link" href="glossary.html"><span class="nav-num">—</span> Glossary</a>
+<a class="nav-link" href="cheatsheet.html"><span class="nav-num">—</span> Cheat Sheet</a>
+</div>
+    <div class="sidebar-footer">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+      <span class="progress-label">Chapter 14 of 15</span>
+    </div>
+  </nav>
+  <main class="main"><div class="chapter-content">
+    <div class="chapter-eyebrow">Part III — APIs · Chapter 14</div>
+    <h1 class="chapter-title">Real API: OpenWeather</h1>
+    <p class="chapter-lead">Everything clicks here. You'll register for a real API key, read real documentation, and build a working weather program that fetches live data.</p>
+    
+<div class="objectives"><div class="objectives-title">🎯 What you'll learn</div><ul>
+<li>How to register for and use a real API key</li>
+<li>Reading real API documentation</li>
+<li>Fetching and parsing live weather data</li>
+<li>Building a complete weather CLI program</li>
+</ul></div>
+
+<div class="callout tip">
+<div class="callout-title">💡 Setup required</div>
+<div class="callout-body"><p>This chapter uses the OpenWeatherMap API. Sign up free at <a href="https://openweathermap.org/api" style="color:var(--accent);">openweathermap.org/api</a>. Your API key arrives by email and activates within a few minutes. Store it as an environment variable: <code>export OWM_API_KEY="your_key"</code></p></div>
+</div>
+
+<h2>14.1 Reading the Documentation</h2>
+<p>The endpoint we'll use is the <strong>Current Weather Data</strong> endpoint:</p>
+<pre>GET https://api.openweathermap.org/data/2.5/weather
+
+Required parameters:
+  q      → city name  (e.g. "Accra")
+  appid  → your API key
+  units  → "metric" (Celsius) or "imperial" (Fahrenheit)</pre>
+
+<h2>14.2 Making the Request</h2>
+<pre><span class="kw">import</span> os
+<span class="kw">import</span> requests
+
+api_key = os.environ.<span class="fn">get</span>(<span class="str">"OWM_API_KEY"</span>)
+
+params = {
+    <span class="str">"q"</span>: <span class="str">"Accra"</span>,
+    <span class="str">"appid"</span>: api_key,
+    <span class="str">"units"</span>: <span class="str">"metric"</span>,
+}
+
+response = requests.<span class="fn">get</span>(
+    <span class="str">"https://api.openweathermap.org/data/2.5/weather"</span>,
+    params=params
+)
+
+<span class="fn">print</span>(response.status_code)
+<span class="fn">print</span>(response.<span class="fn">json</span>())</pre>
+
+<h2>14.3 Understanding the Response</h2>
+<p>The API returns a rich JSON object. Here's the structure you'll use most:</p>
+<pre>{
+    <span class="str">"name"</span>: <span class="str">"Accra"</span>,
+    <span class="str">"main"</span>: {
+        <span class="str">"temp"</span>: <span class="num">28.5</span>,
+        <span class="str">"feels_like"</span>: <span class="num">31.2</span>,
+        <span class="str">"humidity"</span>: <span class="num">78</span>
+    },
+    <span class="str">"weather"</span>: [
+        {<span class="str">"description"</span>: <span class="str">"scattered clouds"</span>}
+    ],
+    <span class="str">"wind"</span>: {<span class="str">"speed"</span>: <span class="num">4.1</span>}
+}</pre>
+<p>Note that <code>"weather"</code> is a <em>list</em> — always access it with <code>[0]</code>.</p>
+
+<h2>14.4 Extracting the Data</h2>
+<pre>data = response.<span class="fn">json</span>()
+
+city        = data[<span class="str">"name"</span>]
+temp        = data[<span class="str">"main"</span>][<span class="str">"temp"</span>]
+feels_like  = data[<span class="str">"main"</span>][<span class="str">"feels_like"</span>]
+humidity    = data[<span class="str">"main"</span>][<span class="str">"humidity"</span>]
+description = data[<span class="str">"weather"</span>][<span class="num">0</span>][<span class="str">"description"</span>]
+wind_speed  = data[<span class="str">"wind"</span>][<span class="str">"speed"</span>]
+
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"Weather in {city}"</span>)
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"  {temp}°C — {description}"</span>)
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"  Feels like {feels_like}°C, humidity {humidity}%"</span>)
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"  Wind: {wind_speed} m/s"</span>)</pre>
+
+<h2>14.5 Handling Errors Properly</h2>
+<p>A 404 from the weather API means the city wasn't found. A 401 means your API key is wrong. Handle both:</p>
+<pre><span class="kw">if</span> response.status_code == <span class="num">200</span>:
+    data = response.<span class="fn">json</span>()
+    <span class="cm"># ... use the data</span>
+<span class="kw">elif</span> response.status_code == <span class="num">404</span>:
+    <span class="fn">print</span>(<span class="str">"City not found. Check the spelling."</span>)
+<span class="kw">elif</span> response.status_code == <span class="num">401</span>:
+    <span class="fn">print</span>(<span class="str">"Invalid API key."</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Error: {response.status_code}"</span>)</pre>
+
+<div class="callout checkpoint">
+<div class="callout-title">🧠 Mini-Project: Weather CLI</div>
+<div class="callout-body">
+<p>Build a complete command-line weather program. The user types a city name; the program fetches and prints the current conditions. Include proper error handling for bad city names and missing API keys. Add the ability to choose Celsius or Fahrenheit.</p>
+<textarea class="checkpoint-input" style="min-height:160px;" placeholder="Write the complete program here…"></textarea>
+<button class="reveal-btn" data-target="ch14-sol" data-show-label="Show solution" data-hide-label="Hide">Show solution</button>
+<div class="reveal-content" id="ch14-sol"><pre><span class="kw">import</span> os
+<span class="kw">import</span> requests
+
+<span class="kw">def</span> <span class="fn">get_weather</span>(city, units=<span class="str">"metric"</span>):
+    api_key = os.environ.<span class="fn">get</span>(<span class="str">"OWM_API_KEY"</span>)
+    <span class="kw">if not</span> api_key:
+        <span class="fn">print</span>(<span class="str">"Error: OWM_API_KEY not set"</span>)
+        <span class="kw">return</span>
+
+    <span class="kw">try</span>:
+        response = requests.<span class="fn">get</span>(
+            <span class="str">"https://api.openweathermap.org/data/2.5/weather"</span>,
+            params={<span class="str">"q"</span>: city, <span class="str">"appid"</span>: api_key, <span class="str">"units"</span>: units},
+            timeout=<span class="num">10</span>
+        )
+    <span class="kw">except</span> requests.exceptions.<span class="cls">RequestException</span> <span class="kw">as</span> e:
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Connection error: {e}"</span>)
+        <span class="kw">return</span>
+
+    <span class="kw">if</span> response.status_code == <span class="num">404</span>:
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"City '{city}' not found."</span>)
+        <span class="kw">return</span>
+    <span class="kw">elif</span> response.status_code == <span class="num">401</span>:
+        <span class="fn">print</span>(<span class="str">"Invalid API key."</span>)
+        <span class="kw">return</span>
+    <span class="kw">elif not</span> response.ok:
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Error: {response.status_code}"</span>)
+        <span class="kw">return</span>
+
+    d = response.<span class="fn">json</span>()
+    unit_sym = <span class="str">"°C"</span> <span class="kw">if</span> units == <span class="str">"metric"</span> <span class="kw">else</span> <span class="str">"°F"</span>
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"\nWeather in {d['name']}"</span>)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"  {d['main']['temp']}{unit_sym} — {d['weather'][0]['description']}"</span>)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"  Feels like {d['main']['feels_like']}{unit_sym}"</span>)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"  Humidity: {d['main']['humidity']}%"</span>)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"  Wind: {d['wind']['speed']} m/s"</span>)
+
+city = <span class="fn">input</span>(<span class="str">"Enter city name: "</span>)
+unit_choice = <span class="fn">input</span>(<span class="str">"Units (metric/imperial) [metric]: "</span>) or <span class="str">"metric"</span>
+<span class="fn">get_weather</span>(city, unit_choice)</pre></div>
+</div>
+</div>
+
+    <div class="chapter-nav">
+      <a class="nav-btn" href="chapter-13.html"><span class="nav-btn-dir">← Previous</span><span class="nav-btn-title">Chapter 13: Working with JSON</span></a>
+      <a class="nav-btn next" href="chapter-15.html"><span class="nav-btn-dir">Next →</span><span class="nav-btn-title">Chapter 15: Real API: GitHub</span></a>
+    </div>
+  </div></main>
+</div>
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<script src="../js/book.js"></script>
+</body></html>
